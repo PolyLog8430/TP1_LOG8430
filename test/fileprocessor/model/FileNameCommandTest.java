@@ -2,82 +2,84 @@ package fileprocessor.model;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import fileprocessor.model.FileNameCommand;
-import fileprocessor.model.ICommand;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
- * Test Cases for the FileNameCommand class.
- * @author Dalia-ATTIA
- *
+ * Test class for FileNameCommand
+ * @see FileNameCommand
  */
 public class FileNameCommandTest {
+    private FileNameCommand command;
+    private File test;
 
-	/**
-	 * To test the return of the correct command name.
-	 * this method is trivial for the current implementation,
-	 * the test is more useful for a more complicated system.
-	 *  
-	 */
-	@Test
-	public void testGetCommandName() {
-		String commandName = FileNameCommand.getCommandName();
-		assertEquals("Wrong command name.", "Nom du fichier", commandName);
-	}
+    @Before
+    public void setUp() throws Exception {
+        command = new FileNameCommand();
+    }
 
-	/**
-	 * Test FileNameCommand execution on folders.
-	 */
-	@Test
-	public void testExecuteForFolder() {
-		ICommand fileNameCommand = new FileNameCommand();
-		String path = Paths.get("./").toAbsolutePath().toString();
-		File folder = new File(path);
-		fileNameCommand.setFile(folder);
-		assertEquals("FileNameCommand should not execute on folders.", "", fileNameCommand.execute());
-	}
+    /**
+     * Test when the file is null
+     * Excepted code result ERROR
+     * @throws Exception
+     */
+    @Test
+    public void testNullFile() throws Exception {
+        command.setFile(null);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.ERROR,command.getCodeResult());
+    }
 
-	/**
-	 * Test FileNameCommand execution on files.
-	 */
-	@Test
-	public void testExecuteForFile() {
-		ICommand fileNameCommand = new FileNameCommand();
-		String fileName = "NewFileName.txt";
-		String path = Paths.get("./").toAbsolutePath().toString();
-		path = path.substring(0, path.length()-1) + fileName;
+    /**
+     * Test when the file not exist
+     * Excepted code result ERROR
+     * @throws Exception
+     */
+    @Test
+    public void testNotExsitingFile() throws Exception {
+        command.setFile(new File(""));
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.ERROR,command.getCodeResult());
+    }
 
-		File testFile = new File(path);
-		try {
-			testFile.createNewFile();
-			fileNameCommand.setFile(testFile);
-			assertEquals("FileNameCommand Wrong execution on files.", fileName, fileNameCommand.execute());
-			testFile.delete();
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("TestExecuteForFiles did not run, error in pre-processing");
-		}
-		
-	}
+    /**
+     * Test a correct file
+     * Excepted code result SUCCESS
+     * Excepted the correct result name
+     * @throws Exception
+     */
+    @Test
+    public void testCorrectFile() throws Exception {
+        test = File.createTempFile("test","");
+        command.setFile(test);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.SUCCESS,command.getCodeResult());
+        assertEquals(test.getName(),command.getResult());
+    }
 
-	/**
-	 * Test whether FileNameCommand should work for folders.
-	 */
-	@Test
-	public void testIsCommandForFolders() {
-		ICommand fileNameCommand = new FileNameCommand();
-		assertFalse(fileNameCommand.isCommandForFolders());
-	}
-	@Test
-	/**
-	 * Test whether FileNameCommand should work for files.
-	 */
-	public void testIsCommandForFiles() {
-		ICommand fileNameCommand = new FileNameCommand();
-		assertTrue(fileNameCommand.isCommandForFiles());
-	}
+    /**
+     * Test with a dir
+     * Excepted code result ERROR
+     * @throws Exception
+     */
+    @Test
+    public void testFailedDir() throws Exception {
+        Path dirPath = Files.createTempDirectory("test");
+        test = dirPath.toFile();
+        command.setFile(test);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.ERROR,command.getCodeResult());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if(test != null){
+            test.deleteOnExit();
+        }
+    }
 }

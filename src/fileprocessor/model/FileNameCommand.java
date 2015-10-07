@@ -8,7 +8,7 @@ public class FileNameCommand extends ICommand {
 
     @Override
     public void execute() {
-        if(file.exists()){
+        if(file != null && file.exists()){
             if(file.isFile()){
                 result = file.getName();
                 codeResult = CommandCodeResult.SUCCESS;
@@ -19,7 +19,7 @@ public class FileNameCommand extends ICommand {
             }
         }
         else{
-            result = "Erreur : " + file.getName() + " n'exsite pas.";
+            result = "Erreur : le fichier n'exsite pas.";
             codeResult = CommandCodeResult.ERROR;
         }
 
