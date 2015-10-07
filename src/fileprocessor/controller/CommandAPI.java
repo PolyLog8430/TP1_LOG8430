@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
 
 import fileprocessor.model.AbsolutePathCommand;
 import fileprocessor.model.FileNameCommand;
@@ -18,8 +19,17 @@ public class CommandAPI  {
 	private boolean invokerRunning;
 	private InvokerThread thread;
 	private static final Object MUTEX_THREAD = new Object();
+	
+	//Singleton
+	private static CommandAPI instance = null;
+    public static CommandAPI getInstance() {
+       if(instance == null) {
+          instance = new CommandAPI();
+       }
+       return instance;
+    }
 
-	public CommandAPI() {
+	protected CommandAPI() {
 		 commands = new HashMap<String, Class<? extends ICommand>>();
 		 commandQueue = new ConcurrentLinkedQueue< ICommand>();
 
@@ -28,6 +38,14 @@ public class CommandAPI  {
 		 thread.start();
 
 		 loadCommands();
+	}
+	
+	public ArrayList<String> getCommands() {
+		ArrayList<String> commandList = new ArrayList<String>();
+		for(String key : commands.keySet()) {
+			commandList.add(key);
+		}
+		return commandList;
 	}
 
 	public void addCommandToQueue(String commandName, String path) throws Exception, InstantiationException, IllegalAccessException {
