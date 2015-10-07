@@ -1,26 +1,29 @@
 package fileprocessor.model;
 
-import java.io.File;
-
-public class FileNameCommand implements ICommand {
-    private File file;
+public class FileNameCommand extends ICommand {
 
     public static String getCommandName() {
         return "Nom du fichier";
     }
 
-    public FileNameCommand() {
-    }
-
     @Override
-    public String execute() {
-        return file.getName();
+    public void execute() {
+        if(file != null && file.exists()){
+            if(file.isFile()){
+                result = file.getName();
+                codeResult = CommandCodeResult.SUCCESS;
+            }
+            else{
+                result = "Erreur : " + file.getName() + " n'est pas un fichier.";
+                codeResult = CommandCodeResult.ERROR;
+            }
+        }
+        else{
+            result = "Erreur : le fichier n'exsite pas.";
+            codeResult = CommandCodeResult.ERROR;
+        }
+
+        this.setChanged();
+        this.notifyObservers();
     }
-
-    @Override
-    public void setFile(File file) {
-		this.file = file;
-    }
-
-
 }

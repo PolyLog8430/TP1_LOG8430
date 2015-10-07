@@ -1,22 +1,29 @@
 package fileprocessor.model;
 
-import java.io.File;
-
-public class FolderNameCommand implements ICommand {
-
-	private File file;
+public class FolderNameCommand extends ICommand {
 
 	public static String getCommandName() {
 		return "Nom du dossier";
 	}
 
 	@Override
-	public String execute() {
-		return this.file.getName();
-	}
+	public void execute() {
+		if(file != null && file.exists()){
+			if(file.isDirectory()){
+				result = file.getName();
+				codeResult = CommandCodeResult.SUCCESS;
+			}
+			else{
+				result = "Erreur : " + file.getName() + " n'est pas un dosser.";
+				codeResult = CommandCodeResult.ERROR;
+			}
+		}
+		else{
+			result = "Erreur : le dossier n'existe pas.";
+			codeResult = CommandCodeResult.ERROR;
+		}
 
-	@Override
-	public void setFile(File file) {
-		this.file = file;
+		this.setChanged();
+		this.notifyObservers();
 	}
 }

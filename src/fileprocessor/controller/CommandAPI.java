@@ -1,10 +1,7 @@
 package fileprocessor.controller;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.ArrayList;
 
@@ -14,30 +11,29 @@ import fileprocessor.model.FolderNameCommand;
 import fileprocessor.model.ICommand;
 
 public class CommandAPI  {
-	private Map<String, Class<? extends ICommand>> commands;
-	private Queue<ICommand> commandQueue;
+	private Map<String, Class<? extends ICommand>> commands = new HashMap<>();
+	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
 	private boolean invokerRunning;
-	private InvokerThread thread;
 	private static final Object MUTEX_THREAD = new Object();
-	
+	private static final Object MUTEX_COMMANDS = new Object();
+
 	//Singleton
 	private static CommandAPI instance = null;
-    public static CommandAPI getInstance() {
+
+    public synchronized static CommandAPI getInstance() {
        if(instance == null) {
           instance = new CommandAPI();
        }
        return instance;
     }
 
-	protected CommandAPI() {
-		 commands = new HashMap<String, Class<? extends ICommand>>();
-		 commandQueue = new ConcurrentLinkedQueue< ICommand>();
+	private CommandAPI() {
+		 commands = new HashMap<>();
+		 commandQueue = new ConcurrentLinkedQueue<>();
 
-		 thread = new InvokerThread();
+		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
-
-		 loadCommands();
 	}
 	
 	public ArrayList<String> getCommands() {
@@ -48,25 +44,47 @@ public class CommandAPI  {
 		return commandList;
 	}
 
-	public void addCommandToQueue(String commandName, String path) throws Exception, InstantiationException, IllegalAccessException {
-		if (commands.containsKey(commandName)) {
-			ICommand command = commands.get(commandName).newInstance();	
-			command.setFile(new File(path));
-			commandQueue.add(command);
-            // Wake up the invoker thread
-            synchronized (MUTEX_THREAD){
-				MUTEX_THREAD.notifyAll();
+	public void addCommandToQueue(String commandName, String path, Observer response) throws Exception, InstantiationException, IllegalAccessException {
+		synchronized (MUTEX_COMMANDS){
+			if (commands.containsKey(commandName)) {
+				// Init command
+				ICommand command = commands.get(commandName).newInstance();
+				command.setFile(new File(path));
+				command.addObserver(response);
+
+				commandQueue.add(command);
+
+			} else {
+				throw new Exception("Command does not exist.");
 			}
-		} else {
-			throw new Exception("Command does not exist.");
+		}
+
+		// Wake up the invoker thread
+		synchronized (MUTEX_THREAD){
+			MUTEX_THREAD.notifyAll();
 		}
 		
 	}
-	
-	private void loadCommands() {
-		commands.put(FileNameCommand.getCommandName(), FileNameCommand.class);
-		commands.put(FolderNameCommand.getCommandName(), FolderNameCommand.class);
-		commands.put(AbsolutePathCommand.getCommandName(), AbsolutePathCommand.class);
+
+	public void addCommandClass(String commandName, Class<? extends ICommand> commandClass){
+		synchronized (MUTEX_COMMANDS){
+			commands.put(commandName, commandClass);
+		}
+
+		 // TODO : informer la vue d'une nouvelle commande
+	}
+
+	public void removeCommandClass(String commandName) throws Exception {
+		synchronized (MUTEX_COMMANDS){
+			if(commands.containsKey(commandName)){
+				commands.remove(commandName);
+			}
+			else{
+				throw new Exception("No command to remove");
+			}
+		}
+
+		// TODO : informer la vue d'une nouvelle commande
 	}
 
 	private void executeCommand(){
@@ -76,8 +94,15 @@ public class CommandAPI  {
 		}
 	}
 
-	private synchronized boolean isInvokerRunning(){
+	public synchronized boolean isInvokerRunning(){
 		return invokerRunning;
+	}
+
+	public synchronized void setInvokerRunning(boolean isRunning){
+		invokerRunning = isRunning;
+		synchronized (MUTEX_THREAD){
+			MUTEX_THREAD.notifyAll();
+		}
 	}
 
 	private class InvokerThread extends Thread{
