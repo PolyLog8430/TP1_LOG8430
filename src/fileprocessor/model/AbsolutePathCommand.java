@@ -1,22 +1,23 @@
 package fileprocessor.model;
 
-import java.io.File;
-
-public class AbsolutePathCommand implements ICommand{
-
-	private File file;
+public class AbsolutePathCommand extends ICommand {
 
 	public static String getCommandName() {
 		return "Chemin absolu";
 	}
 
 	@Override
-	public String execute() {
-		return file.getAbsolutePath();
-	}
+	public void execute() {
+		if(file.exists()){
+			result = file.getAbsolutePath();
+			codeResult = CommandCodeResult.SUCCESS;
+		}
+		else{
+			result = "Erreur : " + file.getName() + " n'existe pas.";
+			codeResult = CommandCodeResult.ERROR;
+		}
 
-	@Override
-	public void setFile(File file) {
-		  this.file = file;
+		this.setChanged();
+		this.notifyObservers();
 	}
 }
