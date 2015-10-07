@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import fileprocessor.model.AbsolutePathCommand;
 import fileprocessor.model.FileNameCommand;
+import fileprocessor.model.FolderNameCommand;
 import fileprocessor.model.ICommand;
 
 public class CommandAPI  {
@@ -43,6 +45,8 @@ public class CommandAPI  {
 	
 	private void loadCommands() {
 		commands.put(FileNameCommand.getCommandName(), FileNameCommand.class);
+		commands.put(FolderNameCommand.getCommandName(), FolderNameCommand.class);
+		commands.put(AbsolutePathCommand.getCommandName(), AbsolutePathCommand.class);
 	}
 
 	private void executeCommand(){
