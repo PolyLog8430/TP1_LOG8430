@@ -46,15 +46,6 @@ public class CommandAPITest {
 		assertEquals(0,commandAPI.getCommands().size());
 	}
 
-	/**
-	 * Test remove a command class with empty list
-	 * Excepted Exception
-	 * @throws Exception
-	 */
-	@Test(expected=Exception.class)
-	public void testRemoveClassCommandEmpty() throws Exception {
-		commandAPI.removeCommandClass(FileNameCommand.getCommandName());
-	}
 
 	/**
 	 * Test remove a command class with random name
