@@ -1,4 +1,4 @@
-package test.view;
+package fileprocessor.view;
 
 import static org.junit.Assert.*;
 

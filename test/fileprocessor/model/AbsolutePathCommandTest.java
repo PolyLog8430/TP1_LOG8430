@@ -1,4 +1,4 @@
-package test.model;
+package fileprocessor.model;
 
 import static org.junit.Assert.*;
 
