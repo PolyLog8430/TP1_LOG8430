@@ -15,9 +15,11 @@ public class CommandAPI  {
 	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
 	private boolean invokerRunning;
 	private static final Object MUTEX_THREAD = new Object();
-	
+	private static final Object MUTEX_COMMANDS = new Object();
+
 	//Singleton
 	private static CommandAPI instance = null;
+
     public synchronized static CommandAPI getInstance() {
        if(instance == null) {
           instance = new CommandAPI();
@@ -32,8 +34,6 @@ public class CommandAPI  {
 		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
-
-		 loadCommands();
 	}
 	
 	public ArrayList<String> getCommands() {
@@ -45,28 +45,43 @@ public class CommandAPI  {
 	}
 
 	public void addCommandToQueue(String commandName, String path, Observer response) throws Exception, InstantiationException, IllegalAccessException {
-		if (commands.containsKey(commandName)) {
-			// Init command
-			ICommand command = commands.get(commandName).newInstance();
-			command.setFile(new File(path));
-			command.addObserver(response);
+		synchronized (MUTEX_COMMANDS){
+			if (commands.containsKey(commandName)) {
+				// Init command
+				ICommand command = commands.get(commandName).newInstance();
+				command.setFile(new File(path));
+				command.addObserver(response);
 
-			commandQueue.add(command);
+				commandQueue.add(command);
 
-            // Wake up the invoker thread
-            synchronized (MUTEX_THREAD){
-				MUTEX_THREAD.notifyAll();
+			} else {
+				throw new Exception("Command does not exist.");
 			}
-		} else {
-			throw new Exception("Command does not exist.");
+		}
+
+		// Wake up the invoker thread
+		synchronized (MUTEX_THREAD){
+			MUTEX_THREAD.notifyAll();
 		}
 		
 	}
-	
-	private void loadCommands() {
-		commands.put(FileNameCommand.getCommandName(), FileNameCommand.class);
-		commands.put(FolderNameCommand.getCommandName(), FolderNameCommand.class);
-		commands.put(AbsolutePathCommand.getCommandName(), AbsolutePathCommand.class);
+
+	public void addCommands(String commandName, Class<? extends ICommand> commandClass){
+		synchronized (MUTEX_COMMANDS){
+			commands.put(commandName, commandClass);
+		}
+
+		 // TODO : informer la vue d'une nouvelle commande
+	}
+
+	public  void removeCommands(String commandName){
+		synchronized (MUTEX_COMMANDS){
+			if(commands.containsKey(commandName)){
+				commands.remove(commandName);
+			}
+		}
+
+		// TODO : informer la vue d'une nouvelle commande
 	}
 
 	private void executeCommand(){
