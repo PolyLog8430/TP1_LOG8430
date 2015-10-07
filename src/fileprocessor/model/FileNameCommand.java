@@ -6,18 +6,18 @@ public class FileNameCommand implements ICommand {
     private File file;
 
     public static String getCommandName() {
-        return "Nom du Fichier";
+        return "Nom du fichier";
     }
 
-    public FileNameCommand(File file) {
-        this.file = file;
+    public FileNameCommand() {
     }
 
     @Override
     public String execute() {
-        return "Nom du fichier = "+file.getName();
+        return file.getName();
     }
 
+    @Override
     public void setFile(File file) {
 		this.file = file;
     }

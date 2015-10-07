@@ -1,8 +1,22 @@
 package fileprocessor.model;
 
-public class AbsolutePathCommand {
+import java.io.File;
+
+public class AbsolutePathCommand implements ICommand{
+
+	private File file;
+
+	public static String getCommandName() {
+		return "Chemin absolu";
+	}
+
+	@Override
 	public String execute() {
-		// TODO Auto-generated method stub
-		return null;
+		return file.getAbsolutePath();
+	}
+
+	@Override
+	public void setFile(File file) {
+		  this.file = file;
 	}
 }
