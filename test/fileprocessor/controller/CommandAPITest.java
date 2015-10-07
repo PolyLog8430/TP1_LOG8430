@@ -1,10 +1,8 @@
-package test.controller;
+package fileprocessor.controller;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-
-import fileprocessor.controller.CommandAPI;
 
 /**
  * 
