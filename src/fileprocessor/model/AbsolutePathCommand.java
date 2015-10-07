@@ -8,12 +8,13 @@ public class AbsolutePathCommand extends ICommand {
 
 	@Override
 	public void execute() {
-		if(file.exists()){
+
+		if(file != null && file.exists()){
 			result = file.getAbsolutePath();
 			codeResult = CommandCodeResult.SUCCESS;
 		}
 		else{
-			result = "Erreur : " + file.getName() + " n'existe pas.";
+			result = "Erreur : le fichier n'existe pas.";
 			codeResult = CommandCodeResult.ERROR;
 		}
 

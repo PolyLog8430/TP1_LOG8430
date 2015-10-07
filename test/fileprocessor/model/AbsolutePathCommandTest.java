@@ -1,81 +1,88 @@
 package fileprocessor.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.junit.Test;
 /**
- * Test Cases for the AbsolutePathCommand class.
- * @author Dalia-ATTIA
- *
+ * Test class for AbsolutePathCommand
+ * @see AbsolutePathCommand
  */
 public class AbsolutePathCommandTest {
 
-	/**
-	 * To test the return of the correct command name.
-	 * this method is trivial for the current implementation,
-	 * the test is more useful for a more complicated system.
-	 *  
-	 */
-	@Test
-	public void testGetCommandName() {
-		String commandName = AbsolutePathCommand.getCommandName();
-		assertEquals("Wrong command name.", "Chemin absolu", commandName);
-	}
+    private AbsolutePathCommand command;
+    private File test;
 
-	/**
-	 * Test the execution of the command on folders.
-	 */
-	@Test
-	public void testExecuteForFolder() {
-		ICommand absolutePathCommand = new AbsolutePathCommand();
-		String path = Paths.get("./").toAbsolutePath().toString();
-		File folder = new File(path);
-		String folderPath = folder.getAbsolutePath();
-		absolutePathCommand.setFile(folder);
-		assertEquals("Execute AbsolutePathCommand for folders fails", 
-				folderPath, absolutePathCommand.execute());
-	}
-	/**
-	 * Test the execution of the command on files.
-	 */
-	@Test
-	public void testExecuteForFile() {
-		ICommand absolutePathCommand = new AbsolutePathCommand();
-		String path = Paths.get("./").toAbsolutePath().toString() + "\\NewFileName.txt";
-		try {
-			File testFile = new File(path);
-			testFile.createNewFile();
-			absolutePathCommand.setFile(testFile);
-			assertEquals("Execute AbsolutePathCommand for files fails", 
-					path, absolutePathCommand.execute());
-			testFile.delete();
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail("TestExecuteForFiles did not run, error in pre-processing");
-		}
-	}
+    @Before
+    public void setUp() throws Exception {
+        command = new AbsolutePathCommand();
+    }
 
-	/**
-	 * Test whether this command should work for folders.
-	 */
-	@Test
-	public void testIsCommandForFolders() {
-		ICommand absolutePathCommand = new AbsolutePathCommand();
-		assertTrue(absolutePathCommand.isCommandForFolders());
-	}
+    /**
+     * Test when the file is null
+     * Excepted code result ERROR
+     * @throws Exception
+     */
+    @Test
+    public void testNullFile() throws Exception {
+        command.setFile(null);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.ERROR,command.getCodeResult());
+    }
 
-	/**
-	 * Test whether this command should work for files.
-	 */
-	@Test
-	public void testIsCommandForFiles() {
-		ICommand absolutePathCommand = new AbsolutePathCommand();
-		assertTrue(absolutePathCommand.isCommandForFiles());
-	}
+    /**
+     * Test when the file not exist
+     * Excepted code result ERROR
+     * @throws Exception
+     */
+    @Test
+    public void testNotExsitingFile() throws Exception {
+        command.setFile(new File(""));
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.ERROR,command.getCodeResult());
+    }
+
+    /**
+     * Test a correct file
+     * Excepted code result SUCCESS
+     * Excepted the correct result path
+     * @throws Exception
+     */
+    @Test
+    public void testCorrectFile() throws Exception {
+        test = File.createTempFile("test","");
+        command.setFile(test);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.SUCCESS,command.getCodeResult());
+        assertEquals(test.getAbsolutePath(),command.getResult());
+    }
+
+    /**
+     * Test a correct dir
+     * Excepted code result SUCCESS
+     * Excepted the correct result dir
+     * @throws Exception
+     */
+    @Test
+    public void testCorrectDir() throws Exception {
+        Path dirPath = Files.createTempDirectory("test");
+        test = dirPath.toFile();
+        command.setFile(test);
+        command.execute();
+        assertEquals(ICommand.CommandCodeResult.SUCCESS,command.getCodeResult());
+        assertEquals(test.getAbsolutePath(),command.getResult());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if(test != null){
+            test.deleteOnExit();
+        }
+    }
 }
