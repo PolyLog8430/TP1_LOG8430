@@ -25,9 +25,9 @@ public class CommandAPI  {
        return instance;
     }
 
-	protected CommandAPI() {
-		 commands = new HashMap<String, Class<? extends ICommand>>();
-		 commandQueue = new ConcurrentLinkedQueue< ICommand>();
+	private CommandAPI() {
+		 commands = new HashMap<>();
+		 commandQueue = new ConcurrentLinkedQueue<>();
 
 		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;

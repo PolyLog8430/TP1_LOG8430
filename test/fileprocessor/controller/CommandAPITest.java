@@ -17,7 +17,7 @@ public class CommandAPITest {
 
 	@Test
 	public void testAddCommandToQueue() throws Exception {
-		CommandAPI commandAPI = new CommandAPI();
+		CommandAPI commandAPI = CommandAPI.getInstance();
 
 		final File test = File.createTempFile("test","");
 		commandAPI.addCommandToQueue(FileNameCommand.getCommandName(), test.getPath(), new Observer() {
@@ -35,7 +35,7 @@ public class CommandAPITest {
 
 	@Test(expected=Exception.class)
 	public void testAddUnknowCommandToQueue() throws Exception {
-		CommandAPI commandAPI = new CommandAPI();
+		CommandAPI commandAPI = CommandAPI.getInstance();
 
 		commandAPI.addCommandToQueue("", "", new Observer() {
 			@Override
