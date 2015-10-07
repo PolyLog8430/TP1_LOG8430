@@ -4,7 +4,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-import commandloader.CommandLoaderTest;
+import fileprocessor.controller.CommandLoaderTest;
 import fileprocessor.controller.CommandAPITest;
 import fileprocessor.model.AbsolutePathCommandTest;
 import fileprocessor.model.FileNameCommandTest;

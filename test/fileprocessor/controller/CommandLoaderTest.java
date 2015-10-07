@@ -1,12 +1,12 @@
-package commandloader;
+package fileprocessor.controller;
 
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import fileprocessor.controller.CommandLoader;
 import org.junit.Test;
 
 import fileprocessor.controller.CommandAPI;
