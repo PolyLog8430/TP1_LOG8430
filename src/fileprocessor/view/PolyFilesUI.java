@@ -43,6 +43,7 @@ public class PolyFilesUI {
 			public void run() {
 				try {
 					PolyFilesUI window = new PolyFilesUI();
+					window.frame.setTitle("PolyFichiers");
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -67,11 +68,19 @@ public class PolyFilesUI {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(0, 2, 0, 0));
 		
-		filePanel = new FilePanel();
+		filePanel = new FilePanel(this);
 		frame.getContentPane().add(filePanel);
 		
-		commandPanel = new CommandPanel();
+		commandPanel = new CommandPanel(this);
 		frame.getContentPane().add(commandPanel);
 		
+	}
+	
+	public FilePanel getFilePanel() {
+		return this.filePanel;
+	}
+	
+	public CommandPanel getCommandPanel() {
+		return this.commandPanel;
 	}
 }

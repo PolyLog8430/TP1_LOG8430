@@ -1,6 +1,7 @@
 package fileprocessor.view;
 
 import java.util.ArrayList;
+import java.util.Observer;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -11,6 +12,9 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import fileprocessor.controller.CommandAPI;
 
 public class CommandPanel extends JPanel {
@@ -20,31 +24,25 @@ public class CommandPanel extends JPanel {
 	private JButton clearBtn;
 	private JCheckBox checkboxAutorun;
 	private JPanel panel;
+	private PolyFilesUI parent;
 
 	/**
 	 * Create the panel.
 	 */
-	public CommandPanel() {
-		
+	public CommandPanel(PolyFilesUI parent) {
+		this.parent = parent;
 		commandButtons = new ArrayList<JButton>();
 		commandResults = new ArrayList<JLabel>();
-		/*
+		
 		ArrayList<String> commands = CommandAPI.getInstance().getCommands();
 		for(String command : commands) {
 			commandButtons.add(new JButton(command));
 			commandResults.add(new JLabel(""));
 		}
-		*/
-		commandButtons.add(new JButton("test1"));
-		commandResults.add(new JLabel("this is a test label"));
-		commandButtons.add(new JButton("test2"));
-		commandResults.add(new JLabel("a result here"));
-		commandButtons.add(new JButton("test3"));
-		commandResults.add(new JLabel("ohai"));
 		
-		JPanel panel = new JPanel();
+		panel = new JPanel();
 		clearBtn = new JButton("Réinitialiser");
-		JCheckBox checkboxAutorun = new JCheckBox("Exécution automatique");
+		checkboxAutorun = new JCheckBox("Exécution automatique");
 		
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
@@ -74,8 +72,39 @@ public class CommandPanel extends JPanel {
 		for(int i=0; i<commandButtons.size(); ++i) {
 			panel.add(commandButtons.get(i));
 			panel.add(commandResults.get(i));
+			commandButtons.get(i).addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					sendCommand(((JButton)(e.getSource())).getText());
+				}
+			});
 		}
 		
 		this.setLayout(groupLayout);
+	}
+	
+	private void sendCommand(String commandName) {
+		//CommandAPI.getInstance().addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile(), /*Observer*/);
+		// Pour savoir quelle JLabel est associée à une commande, utiliser getResultLabelForCommand().
+	}
+	
+	public void sendAllCommands() {
+		for(JButton commandBtn : this.commandButtons) {
+			this.sendCommand(commandBtn.getText());
+		}
+	}
+	
+	public boolean autorunIsChecked() {
+		return this.checkboxAutorun.isSelected();
+	}
+	
+	private JLabel getResultLabelForCommand(String commandName) {
+		JLabel resultLabel = null;
+		for(int i=0; i<commandButtons.size(); ++i) {
+			if(commandButtons.get(i).getText().equals(commandName)) {
+				resultLabel = commandResults.get(i);
+				break;
+			}
+		}
+		return resultLabel;
 	}
 }
