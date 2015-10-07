@@ -1,10 +1,7 @@
 package fileprocessor.controller;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.ArrayList;
 
@@ -14,15 +11,14 @@ import fileprocessor.model.FolderNameCommand;
 import fileprocessor.model.ICommand;
 
 public class CommandAPI  {
-	private Map<String, Class<? extends ICommand>> commands;
-	private Queue<ICommand> commandQueue;
+	private Map<String, Class<? extends ICommand>> commands = new HashMap<>();
+	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
 	private boolean invokerRunning;
-	private InvokerThread thread;
 	private static final Object MUTEX_THREAD = new Object();
 	
 	//Singleton
 	private static CommandAPI instance = null;
-    public static CommandAPI getInstance() {
+    public synchronized static CommandAPI getInstance() {
        if(instance == null) {
           instance = new CommandAPI();
        }
@@ -33,7 +29,7 @@ public class CommandAPI  {
 		 commands = new HashMap<String, Class<? extends ICommand>>();
 		 commandQueue = new ConcurrentLinkedQueue< ICommand>();
 
-		 thread = new InvokerThread();
+		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
 
@@ -48,11 +44,15 @@ public class CommandAPI  {
 		return commandList;
 	}
 
-	public void addCommandToQueue(String commandName, String path) throws Exception, InstantiationException, IllegalAccessException {
+	public void addCommandToQueue(String commandName, String path, Observer response) throws Exception, InstantiationException, IllegalAccessException {
 		if (commands.containsKey(commandName)) {
-			ICommand command = commands.get(commandName).newInstance();	
+			// Init command
+			ICommand command = commands.get(commandName).newInstance();
 			command.setFile(new File(path));
+			command.addObserver(response);
+
 			commandQueue.add(command);
+
             // Wake up the invoker thread
             synchronized (MUTEX_THREAD){
 				MUTEX_THREAD.notifyAll();
@@ -76,8 +76,15 @@ public class CommandAPI  {
 		}
 	}
 
-	private synchronized boolean isInvokerRunning(){
+	public synchronized boolean isInvokerRunning(){
 		return invokerRunning;
+	}
+
+	public synchronized void setInvokerRunning(boolean isRunning){
+		invokerRunning = isRunning;
+		synchronized (MUTEX_THREAD){
+			MUTEX_THREAD.notifyAll();
+		}
 	}
 
 	private class InvokerThread extends Thread{
