@@ -15,6 +15,11 @@ import java.util.Observer;
  */
 public class CommandAPITest {
 
+	/**
+	 * Test to add a command in the queue
+	 * Excepted a ICommand.CommandCodeResult.SUCCESS in the observer
+	 * @throws Exception
+	 */
 	@Test
 	public void testAddCommandToQueue() throws Exception {
 		CommandAPI commandAPI = CommandAPI.getInstance();
@@ -33,8 +38,13 @@ public class CommandAPITest {
 		test.deleteOnExit();
 	}
 
+	/**
+	 * Test unknown command to the queue
+	 * Excepted an Exception
+	 * @throws Exception
+	 */
 	@Test(expected=Exception.class)
-	public void testAddUnknowCommandToQueue() throws Exception {
+	public void testAddUnknownCommandToQueue() throws Exception {
 		CommandAPI commandAPI = CommandAPI.getInstance();
 
 		commandAPI.addCommandToQueue("", "", new Observer() {
