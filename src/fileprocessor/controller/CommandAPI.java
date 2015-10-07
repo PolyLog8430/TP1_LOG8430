@@ -17,6 +17,7 @@ public class CommandAPI  {
 	private Queue<ICommand> commandQueue;
 	private boolean invokerRunning;
 	private InvokerThread thread;
+	private static final Object MUTEX_THREAD = new Object();
 
 	public CommandAPI() {
 		 commands = new HashMap<String, Class<? extends ICommand>>();
@@ -34,9 +35,10 @@ public class CommandAPI  {
 			ICommand command = commands.get(commandName).newInstance();	
 			command.setFile(new File(path));
 			commandQueue.add(command);
-
             // Wake up the invoker thread
-            thread.notify();
+            synchronized (MUTEX_THREAD){
+				MUTEX_THREAD.notifyAll();
+			}
 		} else {
 			throw new Exception("Command does not exist.");
 		}
@@ -68,9 +70,11 @@ public class CommandAPI  {
 				executeCommand();
 
                 if(commandQueue.isEmpty()){
-                    try {
-                        this.wait();
-                    } catch (InterruptedException ignored) {}
+                    synchronized (MUTEX_THREAD){
+						try {
+							MUTEX_THREAD.wait();
+						} catch (InterruptedException ignored) {}
+					}
                 }
 			}
 		}
