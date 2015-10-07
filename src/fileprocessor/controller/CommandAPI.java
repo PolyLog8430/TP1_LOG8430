@@ -66,7 +66,7 @@ public class CommandAPI  {
 		
 	}
 
-	public void addCommands(String commandName, Class<? extends ICommand> commandClass){
+	public void addCommandClass(String commandName, Class<? extends ICommand> commandClass){
 		synchronized (MUTEX_COMMANDS){
 			commands.put(commandName, commandClass);
 		}
@@ -74,7 +74,7 @@ public class CommandAPI  {
 		 // TODO : informer la vue d'une nouvelle commande
 	}
 
-	public  void removeCommands(String commandName){
+	public  void removeCommandClass(String commandName){
 		synchronized (MUTEX_COMMANDS){
 			if(commands.containsKey(commandName)){
 				commands.remove(commandName);

@@ -25,6 +25,7 @@ public class CommandAPITest {
 		CommandAPI commandAPI = CommandAPI.getInstance();
 
 		final File test = File.createTempFile("test","");
+		commandAPI.addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 		commandAPI.addCommandToQueue(FileNameCommand.getCommandName(), test.getPath(), new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
