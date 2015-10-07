@@ -74,10 +74,13 @@ public class CommandAPI  {
 		 // TODO : informer la vue d'une nouvelle commande
 	}
 
-	public  void removeCommandClass(String commandName){
+	public void removeCommandClass(String commandName) throws Exception {
 		synchronized (MUTEX_COMMANDS){
 			if(commands.containsKey(commandName)){
 				commands.remove(commandName);
+			}
+			else{
+				throw new Exception("No command to remove");
 			}
 		}
 
