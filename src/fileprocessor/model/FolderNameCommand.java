@@ -8,7 +8,7 @@ public class FolderNameCommand extends ICommand {
 
 	@Override
 	public void execute() {
-		if(file.exists()){
+		if(file != null && file.exists()){
 			if(file.isDirectory()){
 				result = file.getName();
 				codeResult = CommandCodeResult.SUCCESS;
@@ -19,7 +19,7 @@ public class FolderNameCommand extends ICommand {
 			}
 		}
 		else{
-			result = "Erreur : " + file.getName() + " n'existe pas.";
+			result = "Erreur : le dossier n'existe pas.";
 			codeResult = CommandCodeResult.ERROR;
 		}
 
