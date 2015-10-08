@@ -41,7 +41,14 @@ public class CommandPanel extends JPanel {
 		}
 		
 		panel = new JPanel();
+		
 		clearBtn = new JButton("Réinitialiser");
+		clearBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				clearResults(e);
+			}
+		});
+		
 		checkboxAutorun = new JCheckBox("Exécution automatique");
 		
 		GroupLayout groupLayout = new GroupLayout(this);
@@ -106,5 +113,11 @@ public class CommandPanel extends JPanel {
 			}
 		}
 		return resultLabel;
+	}
+	
+	private void clearResults(ActionEvent e) {
+		for(JLabel label : commandResults) {
+			label.setText("");
+		}
 	}
 }
