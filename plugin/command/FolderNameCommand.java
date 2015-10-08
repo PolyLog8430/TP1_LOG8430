@@ -1,11 +1,12 @@
 package command;
 
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 public class FolderNameCommand extends ICommand {
 
-	public static String getCommandName() {
-		return "Nom du dossier";
+	public static MetaCommand getCommandName() {
+		return new MetaCommand("Nom du dossier",true,false);
 	}
 
 	@Override
