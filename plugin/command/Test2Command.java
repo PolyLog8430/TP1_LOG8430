@@ -4,12 +4,11 @@ import java.io.File;
 
 import fileprocessor.model.ICommand;
 
-public class Test2Command implements ICommand {
+public class Test2Command extends ICommand {
 
 	@Override
-	public String execute() {
+	public void execute() {
 		System.out.println("Test 2 working");
-		return null;
 	}
 
 	@Override
