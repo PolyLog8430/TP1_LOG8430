@@ -23,7 +23,7 @@ public class CommandLoader extends Thread {
 	private ArrayList<Class<? extends ICommand>> commandList;
 	private CommandAPI commandAPI;
 	// Directory listener
-	private WatchKey key;
+	//private WatchKey key;
 	private WatchService watcher;
 
 	public CommandLoader(CommandAPI commandAPI, String path) {
@@ -33,7 +33,7 @@ public class CommandLoader extends Thread {
 
 		/* Get plugin directory */
 		File commandDirectory = null;
-		Path commandDirectoryPath = Paths.get("./plugin/command").toAbsolutePath();
+		Path commandDirectoryPath = Paths.get("plugin/command/").toAbsolutePath();
 		System.out.println("Command Directory Path: " + commandDirectoryPath);
 
 		if (path == null || path.equals("")) {
@@ -57,7 +57,7 @@ public class CommandLoader extends Thread {
 			e.printStackTrace();
 		}
 		try {
-			key = commandDirectoryPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+			WatchKey key = commandDirectoryPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -76,7 +76,7 @@ public class CommandLoader extends Thread {
 	 */
 	public void initLoadCommands(File commandDirectory)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		System.out.println("Current project directory is : " + Paths.get("./").toAbsolutePath());
+		System.out.println("Current project directory is : " + commandDirectory.getAbsolutePath());
 
 		for (File command : commandDirectory.listFiles()) {
 
@@ -100,7 +100,7 @@ public class CommandLoader extends Thread {
 	@Override
 	public void run() {
 		for (;;) {
-
+			WatchKey key = null;
 			// wait for key to be signaled
 			try {
 				key = watcher.take();
@@ -118,33 +118,28 @@ public class CommandLoader extends Thread {
 				// are lost or discarded.
 				if (kind == OVERFLOW) {
 					continue;
-				} else if (kind == ENTRY_CREATE || kind == ENTRY_MODIFY) {
+					// Ajouter kind == ENTRY_MODIFY
+				} else if (kind == ENTRY_CREATE ) {
 					// The filename is the
 					// context of the event.
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
-
-					for (Class<? extends ICommand> command : commandList) {
-
-						if (command.getName().equals(fileName.toString())) {
-							commandList.remove(command);
-							try {
-								Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
-								commandList.add(commandClass);
-								commandAPI.addCommandClass(fileName.toString(), commandClass);
-							} catch (ClassNotFoundException e) {
-								e.printStackTrace();
-							}
-							System.out.println("Add to commandAPI");
-							break;
-						}
+					
+					try {
+						Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
+						commandList.add(commandClass);
+						commandAPI.addCommandClass(fileName.toString(), commandClass);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
 					}
+					System.out.println("Add to commandAPI");
+						
 				} else if (kind == ENTRY_DELETE) {
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
-
+					
 					for (Class<? extends ICommand> command : commandList) {
-						if (command.getName().equals(fileName.toString())) {
+						if (command.getSimpleName().equals(fileName.toString().split(".class")[0])) {
 							commandList.remove(command);
 							try {
 								commandAPI.removeCommandClass(fileName.toString());
@@ -152,6 +147,7 @@ public class CommandLoader extends Thread {
 								e.printStackTrace();
 							}
 							System.out.println("Remove from commandAPI");
+							break;
 						}
 					}
 				}
