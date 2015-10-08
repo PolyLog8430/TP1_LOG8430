@@ -21,17 +21,18 @@ import fileprocessor.model.ICommand;
 public class CommandLoader extends Thread {
 
 	private ArrayList<Class<? extends ICommand>> commandList;
-
+	private CommandAPI commandAPI;
 	// Directory listener
 	private WatchKey key;
 	private WatchService watcher;
 
-	public CommandLoader(String path)
-			throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public CommandLoader(CommandAPI commandAPI, String path) {
+				
+		this.commandAPI = commandAPI;
 		commandList = new ArrayList<Class<? extends ICommand>>();
 
 		/* Get plugin directory */
-		File commandDirectory;
+		File commandDirectory = null;
 		Path commandDirectoryPath = Paths.get("./plugin/command").toAbsolutePath();
 		System.out.println("Command Directory Path: " + commandDirectoryPath);
 
@@ -49,12 +50,24 @@ public class CommandLoader extends Thread {
 			System.err.println("Specified plugin dir is not a directory");
 		}
 
-		watcher = FileSystems.getDefault().newWatchService();
-		key = commandDirectoryPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
-
-		initLoadCommands(commandDirectory);
-
-		start();
+		try {
+			watcher = FileSystems.getDefault().newWatchService();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			key = commandDirectoryPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			initLoadCommands(commandDirectory);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -71,7 +84,7 @@ public class CommandLoader extends Thread {
 			if (command.getName().endsWith(".class")) {
 				Class<? extends ICommand> commandClass = loadCommand(command);
 				commandList.add(commandClass);
-				CommandAPI.getInstance().addCommandClass(command.getName(), commandClass);
+				commandAPI.addCommandClass(command.getName(), commandClass);
 			}
 		}
 	}
@@ -118,7 +131,7 @@ public class CommandLoader extends Thread {
 							try {
 								Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
 								commandList.add(commandClass);
-								CommandAPI.getInstance().addCommandClass(fileName.toString(), commandClass);
+								commandAPI.addCommandClass(fileName.toString(), commandClass);
 							} catch (ClassNotFoundException e) {
 								e.printStackTrace();
 							}
@@ -134,7 +147,7 @@ public class CommandLoader extends Thread {
 						if (command.getName().equals(fileName.toString())) {
 							commandList.remove(command);
 							try {
-								CommandAPI.getInstance().removeCommandClass(fileName.toString());
+								commandAPI.removeCommandClass(fileName.toString());
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
