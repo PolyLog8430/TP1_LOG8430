@@ -4,9 +4,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import fileprocessor.model.AbsolutePathCommandTest;
-import fileprocessor.model.FileNameCommandTest;
-import fileprocessor.model.FolderNameCommandTest;
+import command.AbsolutePathCommandTest;
+import command.FileNameCommandTest;
+import command.FolderNameCommandTest;
 
 /**
  * Suite classes to run all test cases.

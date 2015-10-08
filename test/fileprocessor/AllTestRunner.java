@@ -6,9 +6,9 @@ import org.junit.runner.notification.Failure;
 
 import fileprocessor.controller.CommandLoaderTest;
 import fileprocessor.controller.CommandAPITest;
-import fileprocessor.model.AbsolutePathCommandTest;
-import fileprocessor.model.FileNameCommandTest;
-import fileprocessor.model.FolderNameCommandTest;
+import command.AbsolutePathCommandTest;
+import command.FileNameCommandTest;
+import command.FolderNameCommandTest;
 
 /**
  * Runner class for all tests.

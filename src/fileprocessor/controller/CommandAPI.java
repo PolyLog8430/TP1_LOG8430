@@ -1,15 +1,10 @@
 package fileprocessor.controller;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.ArrayList;
 
-import fileprocessor.model.AbsolutePathCommand;
-import fileprocessor.model.FileNameCommand;
-import fileprocessor.model.FolderNameCommand;
 import fileprocessor.model.ICommand;
 
 public class CommandAPI extends Observable {
@@ -30,13 +25,10 @@ public class CommandAPI extends Observable {
 		 
 		 commandLoader = new CommandLoader(this, null);
 		 commandLoader.start();
-		 
-		 // TODO : importer la liste de commande dynamiquement
-		 addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 	}
 
 	public ArrayList<String> getCommands() {
-		ArrayList<String> commandList = new ArrayList<String>();
+		ArrayList<String> commandList = new ArrayList<>();
 		for(String key : commands.keySet()) {
 			commandList.add(key);
 		}
@@ -69,7 +61,6 @@ public class CommandAPI extends Observable {
 			commands.put(commandName, commandClass);
 		}
 
-		 // TODO : informer la vue d'une nouvelle commande
 		this.setChanged();
 		this.notifyObservers();
 	}
@@ -84,7 +75,6 @@ public class CommandAPI extends Observable {
 			}
 		}
 
-		// TODO : informer la vue d'une nouvelle commande
 		this.setChanged();
 		this.notifyObservers();
 	}
