@@ -27,7 +27,7 @@ public class CommandDataParser {
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder = null;
 		Document doc = null;
-			//"/home/template/Documents/LOG8430/TP1_LOG8430/plugin/command/TestCommand.xml"
+
 		try {
 			fXmlFile = new File(path);
 		    dbFactory = DocumentBuilderFactory.newInstance();
@@ -64,10 +64,5 @@ public class CommandDataParser {
 		NodeList node = docEl.getElementsByTagName("applyOnFile");	
 	    boolean applyOnFile = Boolean.parseBoolean(node.item(0).getFirstChild().getNodeValue());
 		return applyOnFile;
-	}
-	
-	public static void main(String[] args) {
-		
-	}
-	
+	}	
 }

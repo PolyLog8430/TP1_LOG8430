@@ -14,14 +14,17 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import fileprocessor.controller.CommandAPI;
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 public class CommandLoader extends Thread {
 
-	private ArrayList<Class<? extends ICommand>> commandList;
+	private HashMap<MetaCommand, Class<? extends ICommand>> commandList;
 	private CommandAPI commandAPI;
+	private CommandDataParser commandDataParser;
+	private Path commandDirectoryPath;
 	// Directory listener
 	//private WatchKey key;
 	private WatchService watcher;
@@ -29,15 +32,16 @@ public class CommandLoader extends Thread {
 	public CommandLoader(CommandAPI commandAPI, String path) {
 
 		this.commandAPI = commandAPI;
-		commandList = new ArrayList<Class<? extends ICommand>>();
+		commandList = new HashMap<MetaCommand, Class<? extends ICommand>>();
+		commandDataParser = new CommandDataParser();
 
 		/* Get plugin directory */
 		File commandDirectory = null;
-		Path commandDirectoryPath = Paths.get("plugin/command/").toAbsolutePath();
+		commandDirectoryPath = Paths.get("plugin/command/").toAbsolutePath();
 		System.out.println("Command Directory Path: " + commandDirectoryPath);
 
 		if (path == null || path.equals("")) {
-			commandDirectory = new File(commandDirectoryPath.toString());
+			commandDirectory = commandDirectoryPath.toFile();
 		} else {
 			commandDirectory = new File(path);
 		}
@@ -53,7 +57,7 @@ public class CommandLoader extends Thread {
 		try {
 			watcher = FileSystems.getDefault().newWatchService();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 		try {
@@ -83,12 +87,19 @@ public class CommandLoader extends Thread {
 			/* For each .class load and add it to the commandList */
 			if (command.getName().endsWith(".class")) {
 				Class<? extends ICommand> commandClass = loadCommand(command);
-				commandList.add(commandClass);
-				commandAPI.addCommandClass(command.getName(), commandClass);
+				MetaCommand mc = commandDataParser.generateMetacommand(command.getAbsolutePath().split(".class")[0] + ".xml");
+				commandList.put(mc, commandClass);
+				commandAPI.addCommandClass(mc, commandClass);
 			}
 		}
 	}
 
+	/**
+	 * Load a command from .class file 
+	 * @param command
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
 	public Class<? extends ICommand> loadCommand(File command) throws ClassNotFoundException {
 
 		String fileName = command.getName().split(".class")[0];
@@ -97,8 +108,15 @@ public class CommandLoader extends Thread {
 		return commandClass;
 	}
 
+	/**
+	 * Plugin directory listener loop
+	 * Check if a file is added or removed from 
+	 * the Plugin directory
+	 * In case it is a .class file add or remove
+	 * it from the commandList and commandApi list
+	 */
 	@Override
-	public void run() {
+	public synchronized void run() {
 		for (;;) {
 			WatchKey key = null;
 			// wait for key to be signaled
@@ -107,7 +125,7 @@ public class CommandLoader extends Thread {
 			} catch (InterruptedException x) {
 				return;
 			}
-
+			System.out.println("Plugin directory event !");
 			for (WatchEvent<?> event : key.pollEvents()) {
 				WatchEvent.Kind<?> kind = event.kind();
 
@@ -124,34 +142,48 @@ public class CommandLoader extends Thread {
 					// context of the event.
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
-					
+
+					if(!fileName.toString().endsWith(".class")) {
+						continue;
+					}
+					System.out.println("Add to commandAPI " + fileName.toAbsolutePath().toString());
 					try {
 						Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
-						commandList.add(commandClass);
-						commandAPI.addCommandClass(fileName.toString(), commandClass);
+						System.out.println(fileName.toAbsolutePath().toString());
+						String metaCommandPath = commandDirectoryPath.toString() + "/" 
+								+ fileName.toString().split(".class")[0] + ".xml";
+						MetaCommand mc = commandDataParser.generateMetacommand(metaCommandPath);
+						commandList.put(mc, commandClass);
+						commandAPI.addCommandClass(mc, commandClass);
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-					}
-					System.out.println("Add to commandAPI");
-						
+					}						
 				} else if (kind == ENTRY_DELETE) {
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
-					
-					for (Class<? extends ICommand> command : commandList) {
-						if (command.getSimpleName().equals(fileName.toString().split(".class")[0])) {
-							commandList.remove(command);
-							try {
-								commandAPI.removeCommandClass(fileName.toString());
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							System.out.println("Remove from commandAPI");
-							break;
-						}
+
+					if(!fileName.toString().endsWith(".class")) {
+						continue;
 					}
+
+					try {
+						for(MetaCommand metaCommand: commandList.keySet()){
+							if (commandList.get(metaCommand).getSimpleName().equals(fileName.toString().split(".class")[0])) {
+								System.out.println("Remove from commandAPI");
+								commandAPI.removeCommandClass(metaCommand);
+								commandList.remove(metaCommand);
+								break;
+							}
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
 				}
+
 			}
+
 
 			// Reset the key -- this step is critical if you want to
 			// receive further watch events. If the key is no longer valid,
@@ -163,7 +195,8 @@ public class CommandLoader extends Thread {
 		}
 	}
 
-	public ArrayList<Class<? extends ICommand>> getCommandList() {
+
+	public HashMap<MetaCommand, Class<? extends ICommand>> getCommandList() {
 		return commandList;
 	}
 
