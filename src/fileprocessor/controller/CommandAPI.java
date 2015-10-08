@@ -28,6 +28,9 @@ public class CommandAPI extends Observable {
 		 invokerRunning = true;
 		 thread.start();
 		 
+		 commandLoader = new CommandLoader(this, null);
+		 commandLoader.start();
+		 
 		 // TODO : importer la liste de commande dynamiquement
 		 addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 	}
@@ -114,4 +117,10 @@ public class CommandAPI extends Observable {
 			}
 		}
 	}
+
+	public CommandLoader getCommandLoader() {
+		return commandLoader;
+	}
+	
+	
 }

@@ -14,7 +14,7 @@ public class TestCommand extends ICommand {
 
 	@Override
 	public void setFile(File file) {
-
+		this.file = file;
 	}
 
 }
