@@ -6,19 +6,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.ArrayList;
 
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 public class CommandAPI extends Observable {
 	private CommandLoader commandLoader;
-	private Map<String, Class<? extends ICommand>> commands = new HashMap<>();
+	private Map<MetaCommand, Class<? extends ICommand>> commands = new HashMap<>();
 	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
 	private boolean invokerRunning;
 	private static final Object MUTEX_THREAD = new Object();
 	private static final Object MUTEX_COMMANDS = new Object();
 
 	public CommandAPI() {
-		 commands = new HashMap<>();
-		 commandQueue = new ConcurrentLinkedQueue<>();
-
 		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
@@ -27,15 +25,15 @@ public class CommandAPI extends Observable {
 		 commandLoader.start();
 	}
 
-	public ArrayList<String> getCommands() {
-		ArrayList<String> commandList = new ArrayList<>();
-		for(String key : commands.keySet()) {
+	public ArrayList<MetaCommand> getCommands() {
+		ArrayList<MetaCommand> commandList = new ArrayList<>();
+		for(MetaCommand key : commands.keySet()) {
 			commandList.add(key);
 		}
 		return commandList;
 	}
 
-	public void addCommandToQueue(String commandName, String path, Observer response) throws Exception {
+	public void addCommandToQueue(MetaCommand commandName, String path, Observer response) throws Exception {
 		synchronized (MUTEX_COMMANDS){
 			if (commands.containsKey(commandName)) {
 				// Init command
@@ -56,7 +54,7 @@ public class CommandAPI extends Observable {
 		}
 	}
 
-	public void addCommandClass(String commandName, Class<? extends ICommand> commandClass){
+	public void addCommandClass(MetaCommand commandName, Class<? extends ICommand> commandClass){
 		synchronized (MUTEX_COMMANDS){
 			commands.put(commandName, commandClass);
 		}
@@ -65,7 +63,7 @@ public class CommandAPI extends Observable {
 		this.notifyObservers();
 	}
 
-	public void removeCommandClass(String commandName) throws Exception {
+	public void removeCommandClass(MetaCommand commandName) throws Exception {
 		synchronized (MUTEX_COMMANDS){
 			if(commands.containsKey(commandName)){
 				commands.remove(commandName);

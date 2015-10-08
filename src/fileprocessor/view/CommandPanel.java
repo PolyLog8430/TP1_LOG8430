@@ -12,13 +12,14 @@ import java.util.function.BiConsumer;
 
 import fileprocessor.controller.CommandAPI;
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 import static org.junit.Assert.assertEquals;
 
 public class CommandPanel extends JPanel implements Observer {
 
-	private Map<String,JButton> commandButtons;
-	private Map<String, JLabel> commandResults;
+	private Map<MetaCommand, JButton> commandButtons;
+	private Map<MetaCommand, JLabel> commandResults;
 	private JButton clearBtn;
 	private JCheckBox checkboxAutorun;
 	private JPanel panel;
@@ -35,7 +36,7 @@ public class CommandPanel extends JPanel implements Observer {
 		controller = new CommandAPI();
 		controller.addObserver(this);
 
-		ArrayList<String> commands = controller.getCommands();
+		ArrayList<MetaCommand> commands = controller.getCommands();
 		updateCommands(commands);
 
 		panel = new JPanel();
@@ -78,24 +79,24 @@ public class CommandPanel extends JPanel implements Observer {
 		this.setLayout(groupLayout);
 	}
 
-	private void updateCommands(ArrayList<String> commands) {
-		Set<String> commandName = commandButtons.keySet();
+	private void updateCommands(ArrayList<MetaCommand> commands) {
+		Set<MetaCommand> commandName = commandButtons.keySet();
 
-		for(String s : commandName){
+		for(MetaCommand s : commandName){
 			 if(!commands.contains(s)){
 				 deleteCommand(s);
 			 }
 		 }
 
-		 for(String s : commands){
+		 for(MetaCommand s : commands){
 			 if(!commandName.contains(s)){
 				 addCommand(s);
 			 }
 		 }
 	}
 
-	private void addCommand(final String s) {
-		final JButton newButton = new JButton(s);
+	private void addCommand(final MetaCommand s) {
+		final JButton newButton = new JButton(s.getName());
 		commandButtons.put(s, newButton);
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -114,7 +115,7 @@ public class CommandPanel extends JPanel implements Observer {
 		});
 	}
 
-	private void deleteCommand(final String s) {
+	private void deleteCommand(final MetaCommand s) {
 		final JLabel labelToDelete = commandResults.get(s);
 		final JButton buttonToDelete = commandButtons.get(s);
 		commandButtons.remove(s);
@@ -129,8 +130,8 @@ public class CommandPanel extends JPanel implements Observer {
 		});
 	}
 
-	private void sendCommand(final String commandName) {
-		final JLabel textToUpdate = getResultLabelForCommand(commandName);
+	private void sendCommand(final MetaCommand commandName) {
+		final JLabel textToUpdate = commandResults.get(commandName);
 		try {
 			controller.addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile().getPath(), new Observer() {
 				@Override
@@ -140,14 +141,13 @@ public class CommandPanel extends JPanel implements Observer {
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								 JLabel toUpdate = commandResults.get(commandName);
 								 if(command.getCodeResult().equals(ICommand.CommandCodeResult.SUCCESS)){
-									 toUpdate.setText(command.getResult());
-									 toUpdate.setForeground(Color.BLACK);
+									 textToUpdate.setText(command.getResult());
+									 textToUpdate.setForeground(Color.BLACK);
 								 }
 								else{
-									 toUpdate.setText(command.getResult());
-									 toUpdate.setForeground(Color.RED);
+									 textToUpdate.setText(command.getResult());
+									 textToUpdate.setForeground(Color.RED);
 								 }
 							}
 						});
@@ -161,7 +161,7 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 	
 	public void sendAllCommands() {
-		for(String commandName : commandButtons.keySet()) {
+		for(MetaCommand commandName : commandButtons.keySet()) {
 			this.sendCommand(commandName);
 		}
 	}
@@ -169,18 +169,17 @@ public class CommandPanel extends JPanel implements Observer {
 	public boolean autorunIsChecked() {
 		return this.checkboxAutorun.isSelected();
 	}
-	
-	private JLabel getResultLabelForCommand(String commandName) {
-		return commandResults.get(commandName);
-	}
 
 	private void clearResults(ActionEvent e) {
-		commandResults.forEach(new BiConsumer<String, JLabel>() {
-			@Override
-			public void accept(String s, JLabel jLabel) {
-				jLabel.setText("");
-			}
-		});
+		for(MetaCommand m : commandResults.keySet()){
+			final JLabel jLabel = commandResults.get(m);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					jLabel.setText("");
+				}
+			});
+		}
 	}
 
 	@Override
