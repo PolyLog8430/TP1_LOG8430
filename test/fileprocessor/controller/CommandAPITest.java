@@ -2,7 +2,7 @@ package fileprocessor.controller;
 
 import static org.junit.Assert.*;
 
-import fileprocessor.model.FileNameCommand;
+import command.FileNameCommand;
 import fileprocessor.model.ICommand;
 import org.junit.Before;
 import org.junit.Test;

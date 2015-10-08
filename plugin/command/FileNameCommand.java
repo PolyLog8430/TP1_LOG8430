@@ -1,4 +1,6 @@
-package fileprocessor.model;
+package command;
+
+import fileprocessor.model.ICommand;
 
 public class FileNameCommand extends ICommand {
 

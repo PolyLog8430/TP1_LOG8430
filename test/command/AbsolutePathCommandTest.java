@@ -1,7 +1,8 @@
-package fileprocessor.model;
+package command;
 
 import static org.junit.Assert.*;
 
+import fileprocessor.model.ICommand;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +77,7 @@ public class AbsolutePathCommandTest {
         command.setFile(test);
         command.execute();
         assertEquals(ICommand.CommandCodeResult.SUCCESS,command.getCodeResult());
-        assertEquals(test.getAbsolutePath(),command.getResult());
+        assertEquals(test.getAbsolutePath(), command.getResult());
     }
 
     @After
