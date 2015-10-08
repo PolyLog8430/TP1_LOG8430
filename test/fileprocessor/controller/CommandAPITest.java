@@ -20,7 +20,7 @@ public class CommandAPITest {
 
 	@Before
 	public void setUp() throws Exception {
-		commandAPI = CommandAPI.getInstance();
+		commandAPI = new CommandAPI();
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class CommandAPITest {
 	 */
 	@Test(expected=Exception.class)
 	public void testAddUnknownCommandToQueue() throws Exception {
-		CommandAPI commandAPI = CommandAPI.getInstance();
+		CommandAPI commandAPI = new CommandAPI();
 
 		commandAPI.addCommandToQueue("", "", new Observer() {
 			@Override

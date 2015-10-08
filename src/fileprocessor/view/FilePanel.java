@@ -55,7 +55,7 @@ public class FilePanel extends JPanel {
 		filePicker = new JFileChooser();
 		filePicker.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		
-		btnFilePicker = new JButton("Choisir un répertoire ou un fichier");
+		btnFilePicker = new JButton("Choisir un rÃ©pertoire ou un fichier");
 		btnFilePicker.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFilePicker(e);

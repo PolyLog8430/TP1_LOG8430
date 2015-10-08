@@ -71,7 +71,7 @@ public class CommandLoader extends Thread {
 			if (command.getName().endsWith(".class")) {
 				Class<? extends ICommand> commandClass = loadCommand(command);
 				commandList.add(commandClass);
-				CommandAPI.getInstance().addCommandClass(command.getName(), commandClass);
+				//CommandAPI.getInstance().addCommandClass(command.getName(), commandClass);
 			}
 		}
 	}
@@ -118,7 +118,7 @@ public class CommandLoader extends Thread {
 							try {
 								Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
 								commandList.add(commandClass);
-								CommandAPI.getInstance().addCommandClass(fileName.toString(), commandClass);
+								//CommandAPI.getInstance().addCommandClass(fileName.toString(), commandClass);
 							} catch (ClassNotFoundException e) {
 								e.printStackTrace();
 							}
@@ -134,7 +134,7 @@ public class CommandLoader extends Thread {
 						if (command.getName().equals(fileName.toString())) {
 							commandList.remove(command);
 							try {
-								CommandAPI.getInstance().removeCommandClass(fileName.toString());
+								//CommandAPI.getInstance().removeCommandClass(fileName.toString());
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
