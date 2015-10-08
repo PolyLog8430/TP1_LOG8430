@@ -4,12 +4,16 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.ArrayList;
 
 import fileprocessor.model.ICommand;
 import fileprocessor.model.MetaCommand;
 
+/**
+ * Controller class
+ * Notify when the list of commands class change
+ */
 public class CommandAPI extends Observable {
+
 	private CommandLoader commandLoader;
 	private Map<MetaCommand, Class<? extends ICommand>> commands = new ConcurrentHashMap<>();
 	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
@@ -26,6 +30,9 @@ public class CommandAPI extends Observable {
 		 commandLoader.start();
 	}
 
+	/**
+	 * @return List of MetaCommand updated
+	 */
 	public Set<MetaCommand> getCommands() {
 		Set<MetaCommand> commandList;
 		synchronized (MUTEX_COMMANDS){
@@ -34,6 +41,13 @@ public class CommandAPI extends Observable {
 		return commandList;
 	}
 
+	/**
+	 * Add command to thread queue
+	 * @param commandName the MetaCommand class
+	 * @param path Path of file/folder selected
+	 * @param response Observer to notify the result of command
+	 * @throws Exception
+	 */
 	public void addCommandToQueue(MetaCommand commandName, String path, Observer response) throws Exception {
 		synchronized (MUTEX_COMMANDS){
 			if (commands.containsKey(commandName)) {
@@ -55,6 +69,11 @@ public class CommandAPI extends Observable {
 		}
 	}
 
+	/**
+	 * Add MetaCommand and Class file to the list
+	 * @param commandName the MetaCommand class
+	 * @param commandClass the Class which extend ICommand
+	 */
 	public void addCommandClass(MetaCommand commandName, Class<? extends ICommand> commandClass){
 		System.out.println("Add command : "+commandName );
 
@@ -65,6 +84,11 @@ public class CommandAPI extends Observable {
 		}
 	}
 
+	/**
+	 * Remove MetaCommand
+	 * @param commandName the MetaCommand to remove
+	 * @throws Exception
+	 */
 	public void removeCommandClass(MetaCommand commandName) throws Exception {
 		System.out.println("Remove command : "+commandName );
 
@@ -81,6 +105,9 @@ public class CommandAPI extends Observable {
 		}
 	}
 
+	/**
+	 * Execute the first command of the queue
+	 */
 	private void executeCommand(){
 		if(!commandQueue.isEmpty()){
 			ICommand cmdToExecute = commandQueue.poll();
@@ -88,10 +115,17 @@ public class CommandAPI extends Observable {
 		}
 	}
 
+	/**
+	 * Test if the invoker thread is running
+	 * @return boolean
+	 */
 	public synchronized boolean isInvokerRunning(){
 		return invokerRunning;
 	}
 
+	/**
+	 * InvokerThread to handle the command queue
+	 */
 	private class InvokerThread extends Thread{
 
 		@Override
@@ -109,10 +143,4 @@ public class CommandAPI extends Observable {
 			}
 		}
 	}
-
-	public CommandLoader getCommandLoader() {
-		return commandLoader;
-	}
-	
-	
 }
