@@ -22,5 +22,4 @@ public class MetaCommand {
 	public boolean isApplyOnFile() {
 		return applyOnFile;
 	}
-
 }
