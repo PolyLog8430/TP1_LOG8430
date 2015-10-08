@@ -1,6 +1,7 @@
 package fileprocessor.view;
 
 import java.util.ArrayList;
+import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
@@ -16,6 +17,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import fileprocessor.controller.CommandAPI;
+import fileprocessor.model.ICommand;
+
+import static org.junit.Assert.assertEquals;
 
 public class CommandPanel extends JPanel {
 	
@@ -42,14 +46,14 @@ public class CommandPanel extends JPanel {
 		
 		panel = new JPanel();
 		
-		clearBtn = new JButton("Réinitialiser");
+		clearBtn = new JButton("Rï¿½initialiser");
 		clearBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				clearResults(e);
 			}
 		});
 		
-		checkboxAutorun = new JCheckBox("Exécution automatique");
+		checkboxAutorun = new JCheckBox("Exï¿½cution automatique");
 		
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
@@ -89,9 +93,20 @@ public class CommandPanel extends JPanel {
 		this.setLayout(groupLayout);
 	}
 	
-	private void sendCommand(String commandName) {
-		//CommandAPI.getInstance().addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile(), /*Observer*/);
-		// Pour savoir quelle JLabel est associée à une commande, utiliser getResultLabelForCommand().
+	private void sendCommand(final String commandName) {
+		try {
+			CommandAPI.getInstance().addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile().getPath(), new Observer() {
+                @Override
+                public void update(Observable o, Object arg) {
+					if(o instanceof ICommand){
+						ICommand command = (ICommand) o;
+						getResultLabelForCommand(commandName).setText(command.getResult());
+					}
+                }
+            });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void sendAllCommands() {

@@ -34,6 +34,9 @@ public class CommandAPI  {
 		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
+
+		 // TODO : importer la liste de commande dynamiquement
+		 addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 	}
 	
 	public ArrayList<String> getCommands() {
