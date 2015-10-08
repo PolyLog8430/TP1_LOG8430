@@ -27,10 +27,10 @@ public class CommandAPI extends Observable {
 		 commandLoader.start();
 	}
 
-	public ArrayList<String> getCommands() {
-		ArrayList<String> commandList = new ArrayList<>();
-		for(String key : commands.keySet()) {
-			commandList.add(key);
+	public Set<String> getCommands() {
+		Set<String> commandList;
+		synchronized (MUTEX_COMMANDS){
+			commandList = commands.keySet();
 		}
 		return commandList;
 	}
@@ -57,15 +57,18 @@ public class CommandAPI extends Observable {
 	}
 
 	public void addCommandClass(String commandName, Class<? extends ICommand> commandClass){
+		System.out.println("Add command : "+commandName );
+
 		synchronized (MUTEX_COMMANDS){
 			commands.put(commandName, commandClass);
+			this.setChanged();
+			this.notifyObservers();
 		}
-
-		this.setChanged();
-		this.notifyObservers();
 	}
 
 	public void removeCommandClass(String commandName) throws Exception {
+		System.out.println("Remove command : "+commandName );
+
 		synchronized (MUTEX_COMMANDS){
 			if(commands.containsKey(commandName)){
 				commands.remove(commandName);
@@ -73,10 +76,10 @@ public class CommandAPI extends Observable {
 			else{
 				throw new Exception("No command to remove");
 			}
-		}
 
-		this.setChanged();
-		this.notifyObservers();
+			this.setChanged();
+			this.notifyObservers();
+		}
 	}
 
 	private void executeCommand(){

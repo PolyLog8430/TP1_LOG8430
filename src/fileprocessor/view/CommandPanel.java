@@ -8,12 +8,11 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import fileprocessor.controller.CommandAPI;
 import fileprocessor.model.ICommand;
-
-import static org.junit.Assert.assertEquals;
 
 public class CommandPanel extends JPanel implements Observer {
 
@@ -24,19 +23,17 @@ public class CommandPanel extends JPanel implements Observer {
 	private JPanel panel;
 	private PolyFilesUI parent;
 	private CommandAPI controller;
+	private static final Object MUTEX_COMMANDS = new Object();
 
 	/**
 	 * Create the panel.
 	 */
 	public CommandPanel(PolyFilesUI parent) {
 		this.parent = parent;
-		commandButtons = new HashMap<>();
-		commandResults = new HashMap<>();
+		commandButtons = new ConcurrentHashMap<>();
+		commandResults = new ConcurrentHashMap<>();
 		controller = new CommandAPI();
 		controller.addObserver(this);
-
-		ArrayList<String> commands = controller.getCommands();
-		updateCommands(commands);
 
 		panel = new JPanel();
 		
@@ -76,40 +73,51 @@ public class CommandPanel extends JPanel implements Observer {
 		panel.setLayout(new GridLayout(0, 2, 10, 10));
 
 		this.setLayout(groupLayout);
+		updateCommands(controller.getCommands());
 	}
 
-	private void updateCommands(ArrayList<String> commands) {
-		Set<String> commandName = commandButtons.keySet();
+	private void updateCommands(Set<String> commands) {
+		Set<String> commandName;
 
-		for(String s : commandName){
-			 if(!commands.contains(s)){
-				 deleteCommand(s);
-			 }
-		 }
+		synchronized (MUTEX_COMMANDS){
+			commandName = commandButtons.keySet();
 
-		 for(String s : commands){
-			 if(!commandName.contains(s)){
-				 addCommand(s);
-			 }
-		 }
+			for(String s : commandName){
+				if(!commands.contains(s)){
+					deleteCommand(s);
+				}
+			}
+
+			for(String s : commands){
+				if(!commandName.contains(s)){
+					addCommand(s);
+				}
+			}
+		}
 	}
 
 	private void addCommand(final String s) {
 		final JButton newButton = new JButton(s);
-		commandButtons.put(s, newButton);
+		final JLabel newLabel = new JLabel("");
+
+			commandButtons.put(s, newButton);
+			commandResults.put(s, newLabel);
+
+
 		newButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendCommand(s);
 			}
 		});
-		final JLabel newLabel = new JLabel("");
-		commandResults.put(s, newLabel);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				panel.add(newButton);
 				panel.add(newLabel);
+				newLabel.setVisible(true);
+				newButton.setVisible(true);
+				panel.revalidate();
 			}
 		});
 	}
@@ -117,20 +125,28 @@ public class CommandPanel extends JPanel implements Observer {
 	private void deleteCommand(final String s) {
 		final JLabel labelToDelete = commandResults.get(s);
 		final JButton buttonToDelete = commandButtons.get(s);
-		commandButtons.remove(s);
-		commandResults.remove(s);
+
+			commandButtons.remove(s);
+			commandResults.remove(s);
+
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				labelToDelete.setVisible(false);
+				buttonToDelete.setVisible(false);
 				panel.remove(labelToDelete);
 				panel.remove(buttonToDelete);
+				panel.revalidate();
 			}
 		});
 	}
 
 	private void sendCommand(final String commandName) {
-		final JLabel textToUpdate = getResultLabelForCommand(commandName);
+		final JLabel textToUpdate;
+		synchronized (MUTEX_COMMANDS){
+			textToUpdate = commandResults.get(commandName);
+		}
 		try {
 			controller.addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile().getPath(), new Observer() {
 				@Override
@@ -140,15 +156,17 @@ public class CommandPanel extends JPanel implements Observer {
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								 JLabel toUpdate = commandResults.get(commandName);
-								 if(command.getCodeResult().equals(ICommand.CommandCodeResult.SUCCESS)){
-									 toUpdate.setText(command.getResult());
-									 toUpdate.setForeground(Color.BLACK);
-								 }
-								else{
-									 toUpdate.setText(command.getResult());
-									 toUpdate.setForeground(Color.RED);
-								 }
+
+								if(textToUpdate != null){
+									if(command.getCodeResult().equals(ICommand.CommandCodeResult.SUCCESS)){
+										textToUpdate.setText(command.getResult());
+										textToUpdate.setForeground(Color.BLACK);
+									}
+									else{
+										textToUpdate.setText(command.getResult());
+										textToUpdate.setForeground(Color.RED);
+									}
+								}
 							}
 						});
 					}
@@ -168,10 +186,6 @@ public class CommandPanel extends JPanel implements Observer {
 	
 	public boolean autorunIsChecked() {
 		return this.checkboxAutorun.isSelected();
-	}
-	
-	private JLabel getResultLabelForCommand(String commandName) {
-		return commandResults.get(commandName);
 	}
 
 	private void clearResults(ActionEvent e) {
