@@ -1,11 +1,12 @@
 package command;
 
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 public class AbsolutePathCommand extends ICommand {
 
-	public static String getCommandName() {
-		return "Chemin absolu";
+	public static MetaCommand getCommandName() {
+		return new MetaCommand("Chemin absolu", true,true);
 	}
 
 	@Override

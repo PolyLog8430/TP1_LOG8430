@@ -9,15 +9,15 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 import fileprocessor.controller.CommandAPI;
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
 
 public class CommandPanel extends JPanel implements Observer {
 
-	private Map<String,JButton> commandButtons;
-	private Map<String, JLabel> commandResults;
+	private Map<MetaCommand, JButton> commandButtons;
+	private Map<MetaCommand, JLabel> commandResults;
 	private JButton clearBtn;
 	private JCheckBox checkboxAutorun;
 	private JPanel panel;
@@ -34,6 +34,8 @@ public class CommandPanel extends JPanel implements Observer {
 		commandResults = new ConcurrentHashMap<>();
 		controller = new CommandAPI();
 		controller.addObserver(this);
+
+		Set<MetaCommand> commands = controller.getCommands();
 
 		panel = new JPanel();
 		
@@ -76,28 +78,27 @@ public class CommandPanel extends JPanel implements Observer {
 		updateCommands(controller.getCommands());
 	}
 
-	private void updateCommands(Set<String> commands) {
-		Set<String> commandName;
+	private void updateCommands(Set<MetaCommand> commands) {
+		Set<MetaCommand> commandName;
 
-		synchronized (MUTEX_COMMANDS){
+		synchronized (MUTEX_COMMANDS) {
 			commandName = commandButtons.keySet();
-
-			for(String s : commandName){
-				if(!commands.contains(s)){
+			for (MetaCommand s : commandName) {
+				if (!commands.contains(s)) {
 					deleteCommand(s);
 				}
 			}
 
-			for(String s : commands){
-				if(!commandName.contains(s)){
+			for (MetaCommand s : commands) {
+				if (!commandName.contains(s)) {
 					addCommand(s);
 				}
 			}
 		}
 	}
 
-	private void addCommand(final String s) {
-		final JButton newButton = new JButton(s);
+	private void addCommand(final MetaCommand s) {
+		final JButton newButton = new JButton(s.getName());
 		final JLabel newLabel = new JLabel("");
 
 			commandButtons.put(s, newButton);
@@ -122,13 +123,11 @@ public class CommandPanel extends JPanel implements Observer {
 		});
 	}
 
-	private void deleteCommand(final String s) {
+	private void deleteCommand(final MetaCommand s) {
 		final JLabel labelToDelete = commandResults.get(s);
 		final JButton buttonToDelete = commandButtons.get(s);
-
-			commandButtons.remove(s);
-			commandResults.remove(s);
-
+		commandButtons.remove(s);
+		commandResults.remove(s);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -142,11 +141,8 @@ public class CommandPanel extends JPanel implements Observer {
 		});
 	}
 
-	private void sendCommand(final String commandName) {
-		final JLabel textToUpdate;
-		synchronized (MUTEX_COMMANDS){
-			textToUpdate = commandResults.get(commandName);
-		}
+	private void sendCommand(final MetaCommand commandName) {
+		final JLabel textToUpdate = commandResults.get(commandName);
 		try {
 			controller.addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile().getPath(), new Observer() {
 				@Override
@@ -179,7 +175,7 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 	
 	public void sendAllCommands() {
-		for(String commandName : commandButtons.keySet()) {
+		for(MetaCommand commandName : commandButtons.keySet()) {
 			this.sendCommand(commandName);
 		}
 	}
@@ -189,12 +185,15 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	private void clearResults(ActionEvent e) {
-		commandResults.forEach(new BiConsumer<String, JLabel>() {
-			@Override
-			public void accept(String s, JLabel jLabel) {
-				jLabel.setText("");
-			}
-		});
+		for(MetaCommand m : commandResults.keySet()){
+			final JLabel jLabel = commandResults.get(m);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					jLabel.setText("");
+				}
+			});
+		}
 	}
 
 	@Override
