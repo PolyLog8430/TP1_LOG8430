@@ -1,14 +1,19 @@
 package fileprocessor.controller;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.ArrayList;
 
+import fileprocessor.model.AbsolutePathCommand;
 import fileprocessor.model.FileNameCommand;
+import fileprocessor.model.FolderNameCommand;
 import fileprocessor.model.ICommand;
 
 public class CommandAPI extends Observable {
+	private CommandLoader commandLoader;
 	private Map<String, Class<? extends ICommand>> commands = new HashMap<>();
 	private Queue<ICommand> commandQueue = new ConcurrentLinkedQueue<>();
 	private boolean invokerRunning;
@@ -22,7 +27,7 @@ public class CommandAPI extends Observable {
 		 InvokerThread thread = new InvokerThread();
 		 invokerRunning = true;
 		 thread.start();
-
+		 
 		 // TODO : importer la liste de commande dynamiquement
 		 addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 	}
