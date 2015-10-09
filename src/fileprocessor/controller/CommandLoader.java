@@ -40,7 +40,7 @@ public class CommandLoader extends Thread {
 
 		/* Get plugin directory */
 		File commandDirectory = null;
-		commandDirectoryPath = Paths.get("plugin/command/").toAbsolutePath();
+		commandDirectoryPath = Paths.get("src/plugin/command/").toAbsolutePath();
 		System.out.println("Command Directory Path: " + commandDirectoryPath);
 
 		if (path == null || path.equals("")) {
