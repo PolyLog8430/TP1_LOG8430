@@ -66,7 +66,6 @@ public class CommandLoader extends Thread {
 		try {
 			WatchKey key = commandDirectoryPath.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -128,7 +127,7 @@ public class CommandLoader extends Thread {
 			} catch (InterruptedException x) {
 				return;
 			}
-			System.out.println("Plugin directory event !");
+			System.out.println("Plugin directory updated !");
 			for (WatchEvent<?> event : key.pollEvents()) {
 				WatchEvent.Kind<?> kind = event.kind();
 
@@ -149,7 +148,7 @@ public class CommandLoader extends Thread {
 					if(!fileName.toString().endsWith(".class")) {
 						continue;
 					}
-					System.out.println("Add to commandAPI " + fileName.toAbsolutePath().toString());
+					System.out.println("Add new Command to CommandAPI : " + fileName.toString());
 					
 					try {
 						Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
@@ -173,7 +172,7 @@ public class CommandLoader extends Thread {
 
 					for(MetaCommand metaCommand: commandList.keySet()){
 						if (commandList.get(metaCommand).getSimpleName().equals(fileName.toString().split(".class")[0])) {
-							System.out.println("Remove from commandAPI");
+							System.out.println("Remove Command from commandAPI : " + fileName.toString() );
 
 							try {
 								commandAPI.removeCommandClass(metaCommand);
