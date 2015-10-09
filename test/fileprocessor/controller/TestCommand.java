@@ -1,4 +1,4 @@
-package command;
+package fileprocessor.controller;
 
 import java.io.File;
 

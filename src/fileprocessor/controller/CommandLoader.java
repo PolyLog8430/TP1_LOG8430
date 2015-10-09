@@ -25,10 +25,13 @@ public class CommandLoader extends Thread {
 	private CommandAPI commandAPI;
 	private CommandDataParser commandDataParser;
 	private Path commandDirectoryPath;
-	// Directory listener
-	//private WatchKey key;
 	private WatchService watcher;
 
+	/**
+	 * Initialize the CommandLoader
+	 * @param commandAPI Instance of CommandApi necessary to update dynamically commands
+	 * @param path Path to the plugin folder or null
+	 */
 	public CommandLoader(CommandAPI commandAPI, String path) {
 
 		this.commandAPI = commandAPI;
@@ -147,17 +150,19 @@ public class CommandLoader extends Thread {
 						continue;
 					}
 					System.out.println("Add to commandAPI " + fileName.toAbsolutePath().toString());
+					
 					try {
 						Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
-						System.out.println(fileName.toAbsolutePath().toString());
 						String metaCommandPath = commandDirectoryPath.toString() + "/" 
 								+ fileName.toString().split(".class")[0] + ".xml";
 						MetaCommand mc = commandDataParser.generateMetacommand(metaCommandPath);
+						
 						commandList.put(mc, commandClass);
 						commandAPI.addCommandClass(mc, commandClass);
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
-					}						
+					}				
+					
 				} else if (kind == ENTRY_DELETE) {
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
@@ -166,24 +171,21 @@ public class CommandLoader extends Thread {
 						continue;
 					}
 
-					try {
-						for(MetaCommand metaCommand: commandList.keySet()){
-							if (commandList.get(metaCommand).getSimpleName().equals(fileName.toString().split(".class")[0])) {
-								System.out.println("Remove from commandAPI");
+					for(MetaCommand metaCommand: commandList.keySet()){
+						if (commandList.get(metaCommand).getSimpleName().equals(fileName.toString().split(".class")[0])) {
+							System.out.println("Remove from commandAPI");
+
+							try {
 								commandAPI.removeCommandClass(metaCommand);
 								commandList.remove(metaCommand);
-								break;
+							} catch (Exception e) {
+								e.printStackTrace();
 							}
+							break;
 						}
-
-					} catch (Exception e) {
-						e.printStackTrace();
 					}
-
 				}
-
 			}
-
 
 			// Reset the key -- this step is critical if you want to
 			// receive further watch events. If the key is no longer valid,

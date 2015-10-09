@@ -33,22 +33,21 @@ public class CommandDataParser {
 		    dbFactory = DocumentBuilderFactory.newInstance();
 			dBuilder = dbFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	    try {
 			doc = dBuilder.parse(fXmlFile);
 		} catch (SAXException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	    
 	    Element docEl = doc.getDocumentElement();
 		
 		return new MetaCommand(getCommandName(docEl), applyOnFolder(docEl), applyOnFile(docEl));
 	}
 	
 	public String getCommandName(Element docEl) {
-		
 		NodeList node = docEl.getElementsByTagName("name");	
 	    String name = node.item(0).getFirstChild().getNodeValue();
 		return name;
