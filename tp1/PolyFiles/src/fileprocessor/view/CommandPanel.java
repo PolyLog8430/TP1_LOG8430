@@ -75,11 +75,16 @@ public class CommandPanel extends JPanel implements Observer {
 		});
 
 		checkboxAutorun = new JCheckBox("Exécution automatique");
+		checkboxAutorun.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				sendAllCommands();
+			}
+		});
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+			groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addComponent(panel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
@@ -93,8 +98,8 @@ public class CommandPanel extends JPanel implements Observer {
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(panel, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(panel, GroupLayout.PREFERRED_SIZE, 236, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 						.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, 31, GroupLayout.PREFERRED_SIZE)
 						.addComponent(checkboxAutorun))
@@ -166,7 +171,11 @@ public class CommandPanel extends JPanel implements Observer {
 				sendCommand(s);
 			}
 		});
-
+		
+		if(checkboxAutorun.isSelected()) {
+			sendCommand(s);
+		}
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
