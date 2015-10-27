@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Command>
+	<name>Absolute Path Command</name>
+	<applyOnFolder>True</applyOnFolder>
+	<applyOnFile>True</applyOnFile>
+</Command>
