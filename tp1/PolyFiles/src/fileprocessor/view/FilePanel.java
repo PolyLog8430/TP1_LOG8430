@@ -104,6 +104,8 @@ public class FilePanel extends JPanel {
 	
 	private void setSelectedFile(File file) {
 		this.selectedFile = file;
+		this.parent.getCommandPanel().clearResults();
+		this.parent.getCommandPanel().updateEnableButtons();
 		if(this.parent.getCommandPanel().autorunIsChecked()) {
 			this.parent.getCommandPanel().sendAllCommands();
 		}

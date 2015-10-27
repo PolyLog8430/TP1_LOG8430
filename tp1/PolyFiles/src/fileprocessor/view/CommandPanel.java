@@ -35,7 +35,8 @@ public class CommandPanel extends JPanel implements Observer {
 	 */
 	private JCheckBox checkboxAutorun;
 	private JPanel panel;
-
+	private JPanel buttonPanel;
+	private JPanel resultPanel;
 	private PolyFilesUI parent;
 
 	/**
@@ -69,7 +70,7 @@ public class CommandPanel extends JPanel implements Observer {
 		JButton clearBtn = new JButton("Réinitialiser");
 		clearBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				clearResults(e);
+				clearResults();
 			}
 		});
 
@@ -99,7 +100,27 @@ public class CommandPanel extends JPanel implements Observer {
 						.addComponent(checkboxAutorun))
 					.addContainerGap())
 		);
-		panel.setLayout(new GridLayout(0, 2, 10, 10));
+		
+		buttonPanel = new JPanel();
+		
+		resultPanel = new JPanel();
+		GroupLayout gl_panel = new GroupLayout(panel);
+		gl_panel.setHorizontalGroup(
+			gl_panel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addComponent(buttonPanel, GroupLayout.PREFERRED_SIZE, 175, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(resultPanel, GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE))
+		);
+		gl_panel.setVerticalGroup(
+			gl_panel.createParallelGroup(Alignment.LEADING)
+				.addComponent(resultPanel, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+				.addComponent(buttonPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+		);
+		buttonPanel.setLayout(new GridLayout(0, 1, 10, 10));
+		resultPanel.setLayout(new GridLayout(0, 1, 10, 10));
+		
+		panel.setLayout(gl_panel);
 
 		this.setLayout(groupLayout);
 	}
@@ -125,6 +146,7 @@ public class CommandPanel extends JPanel implements Observer {
 				}
 			}
 		}
+		updateEnableButtons();
 	}
 
 	/**
@@ -148,11 +170,12 @@ public class CommandPanel extends JPanel implements Observer {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				panel.add(newButton);
-				panel.add(newLabel);
+				buttonPanel.add(newButton);
+				resultPanel.add(newLabel);
 				newLabel.setVisible(true);
 				newButton.setVisible(true);
-				panel.revalidate();
+				buttonPanel.revalidate();
+				resultPanel.revalidate();
 			}
 		});
 	}
@@ -172,11 +195,29 @@ public class CommandPanel extends JPanel implements Observer {
 			public void run() {
 				labelToDelete.setVisible(false);
 				buttonToDelete.setVisible(false);
-				panel.remove(labelToDelete);
-				panel.remove(buttonToDelete);
-				panel.revalidate();
+				buttonPanel.remove(buttonToDelete);
+				resultPanel.remove(labelToDelete);
+				buttonPanel.revalidate();
+				resultPanel.revalidate();
 			}
 		});
+	}
+	
+	/**
+	 * 
+	 */
+	public void updateEnableButtons() {
+		for (MetaCommand key : commandButtons.keySet()) {
+			if(parent.getFilePanel().getSelectedFile() == null
+					|| (parent.getFilePanel().getSelectedFile().isDirectory() && !key.isApplyOnFolder())
+					|| (!parent.getFilePanel().getSelectedFile().isDirectory() && !key.isApplyOnFile())
+			) {
+				commandButtons.get(key).setEnabled(false);
+			}
+			else {
+				commandButtons.get(key).setEnabled(true);
+			}
+		}
 	}
 
 	/**
@@ -197,11 +238,11 @@ public class CommandPanel extends JPanel implements Observer {
 
 								if(textToUpdate != null){
 									if(command.getCodeResult().equals(ICommand.CommandCodeResult.SUCCESS)){
-										textToUpdate.setText(command.getResult());
+										textToUpdate.setText("<html><div>"+command.getResult()+"</div></html>");
 										textToUpdate.setForeground(Color.BLACK);
 									}
 									else{
-										textToUpdate.setText(command.getResult());
+										textToUpdate.setText("<html><div>"+command.getResult()+"</div></html>");
 										textToUpdate.setForeground(Color.RED);
 									}
 								}
@@ -221,7 +262,9 @@ public class CommandPanel extends JPanel implements Observer {
 	 */
 	public void sendAllCommands() {
 		for(MetaCommand commandName : commandButtons.keySet()) {
-			this.sendCommand(commandName);
+			if(commandButtons.get(commandName).isEnabled()) {
+				this.sendCommand(commandName);
+			}
 		}
 	}
 
@@ -231,12 +274,11 @@ public class CommandPanel extends JPanel implements Observer {
 	public boolean autorunIsChecked() {
 		return this.checkboxAutorun.isSelected();
 	}
-
+	
 	/**
-	 * Clear GUI
-	 * @param e ActionEvent
+	 * Clear results in GUI
 	 */
-	private void clearResults(ActionEvent e) {
+	public void clearResults() {
 		for(MetaCommand m : commandResults.keySet()){
 			final JLabel jLabel = commandResults.get(m);
 			SwingUtilities.invokeLater(new Runnable() {
