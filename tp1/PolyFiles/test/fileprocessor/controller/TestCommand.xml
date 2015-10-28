@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Command>
-	<name>Test Command</name>
-	<applyOnFolder>True</applyOnFolder>
-	<applyOnFile>False</applyOnFile>
-</Command>
