@@ -20,8 +20,11 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.awt.event.ActionEvent;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
-public class FilePanel extends JPanel {
+public class ResourcePanel extends JPanel {
 	
 	private JTree tree;
 	private FileTreeModel treeModel;
@@ -31,12 +34,36 @@ public class FilePanel extends JPanel {
 	private File root = null;
 	private File selectedFile = null;
 	private PolyFilesUI parent;
+	private JTextField textField;
 
 	/**
 	 * Create the panel.
 	 */
-	public FilePanel(PolyFilesUI parent) {
+	public ResourcePanel(PolyFilesUI parent) {
 		this.parent = parent;
+		
+		filePicker = new JFileChooser();
+		filePicker.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		GroupLayout groupLayout = new GroupLayout(this);
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+					.addContainerGap())
+		);
+		groupLayout.setVerticalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+					.addContainerGap())
+		);
+		
+		JPanel localResourcePanel = new JPanel();
+		tabbedPane.addTab("<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Ressource locale</body></html>", null, localResourcePanel, null);
 		
 		tree = new JTree();
 		tree.setModel(new DefaultTreeModel(null));
@@ -52,36 +79,63 @@ public class FilePanel extends JPanel {
 		});
 		scroll = new JScrollPane(tree);
 		
-		filePicker = new JFileChooser();
-		filePicker.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		
 		btnFilePicker = new JButton("Choisir un répertoire ou un fichier");
+		GroupLayout gl_localResourcePanel = new GroupLayout(localResourcePanel);
+		gl_localResourcePanel.setHorizontalGroup(
+			gl_localResourcePanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_localResourcePanel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_localResourcePanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(btnFilePicker, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
+						.addComponent(scroll, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE))
+					.addContainerGap())
+		);
+		gl_localResourcePanel.setVerticalGroup(
+			gl_localResourcePanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_localResourcePanel.createSequentialGroup()
+					.addGap(5)
+					.addComponent(scroll, GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(btnFilePicker, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
+					.addGap(6))
+		);
+		localResourcePanel.setLayout(gl_localResourcePanel);
+		
+		JPanel externalResourcePanel = new JPanel();
+		tabbedPane.addTab("<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5>Ressource externe</body></html>", null, externalResourcePanel, null);
+		
+		textField = new JTextField();
+		textField.setColumns(10);
+		
+		JLabel lblEntrezLuriDe = new JLabel("Entrez l'URI de la ressource externe :");
+		GroupLayout gl_externalResourcePanel = new GroupLayout(externalResourcePanel);
+		gl_externalResourcePanel.setHorizontalGroup(
+			gl_externalResourcePanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_externalResourcePanel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_externalResourcePanel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_externalResourcePanel.createSequentialGroup()
+							.addComponent(lblEntrezLuriDe, GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+							.addGap(217))
+						.addComponent(textField, GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE))
+					.addContainerGap())
+		);
+		gl_externalResourcePanel.setVerticalGroup(
+			gl_externalResourcePanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_externalResourcePanel.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(lblEntrezLuriDe, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(textField, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(177, Short.MAX_VALUE))
+		);
+		externalResourcePanel.setLayout(gl_externalResourcePanel);
 		btnFilePicker.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openFilePicker(e);
 			}
 		});
-		
-		GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addComponent(btnFilePicker, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
-						.addComponent(scroll, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
-					.addContainerGap())
-		);
-		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(scroll, GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(btnFilePicker, GroupLayout.PREFERRED_SIZE, 28, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap())
-		);
-		this.setLayout(groupLayout);
+		setLayout(groupLayout);
 	}
 	
 	private void openFilePicker(ActionEvent e) {
@@ -114,7 +168,6 @@ public class FilePanel extends JPanel {
 	public File getSelectedFile() {
 		return this.selectedFile;
 	}
-
 }
 
 class FileTreeModel implements TreeModel {

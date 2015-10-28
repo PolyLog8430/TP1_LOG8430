@@ -8,7 +8,7 @@ import java.awt.GridLayout;
 public class PolyFilesUI {
 
 	private JFrame frame;
-	private FilePanel filePanel;
+	private ResourcePanel resourcePanel;
 	private CommandPanel commandPanel;
 
 	/**
@@ -44,16 +44,16 @@ public class PolyFilesUI {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(0, 2, 0, 0));
 		
-		filePanel = new FilePanel(this);
-		frame.getContentPane().add(filePanel);
+		resourcePanel = new ResourcePanel(this);
+		frame.getContentPane().add(resourcePanel);
 		
 		commandPanel = new CommandPanel(this);
 		frame.getContentPane().add(commandPanel);
 		
 	}
 	
-	public FilePanel getFilePanel() {
-		return this.filePanel;
+	public ResourcePanel getResourcePanel() {
+		return this.resourcePanel;
 	}
 	
 	public CommandPanel getCommandPanel() {

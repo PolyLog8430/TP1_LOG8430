@@ -48,6 +48,7 @@ public class CommandPanel extends JPanel implements Observer {
 	 * Mutex for commandButtons and commandResults
 	 */
 	private static final Object MUTEX_COMMANDS = new Object();
+	private JButton btnSauvegarder;
 
 	/**
 	 * Create the panel.
@@ -80,29 +81,35 @@ public class CommandPanel extends JPanel implements Observer {
 				sendAllCommands();
 			}
 		});
+		
+		btnSauvegarder = new JButton("Sauvegarder");
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.TRAILING)
+			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panel, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
-						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-							.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
+						.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, 143, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnSauvegarder, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 							.addComponent(checkboxAutorun)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(11)
+					.addContainerGap()
 					.addComponent(panel, GroupLayout.PREFERRED_SIZE, 236, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.UNRELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addComponent(clearBtn, GroupLayout.PREFERRED_SIZE, 31, GroupLayout.PREFERRED_SIZE)
-						.addComponent(checkboxAutorun))
+					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+						.addComponent(clearBtn, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+							.addComponent(checkboxAutorun)
+							.addComponent(btnSauvegarder, GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		
@@ -115,12 +122,12 @@ public class CommandPanel extends JPanel implements Observer {
 				.addGroup(gl_panel.createSequentialGroup()
 					.addComponent(buttonPanel, GroupLayout.PREFERRED_SIZE, 175, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(resultPanel, GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE))
+					.addComponent(resultPanel, GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
 		);
 		gl_panel.setVerticalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addComponent(resultPanel, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
 				.addComponent(buttonPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+				.addComponent(resultPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
 		);
 		buttonPanel.setLayout(new GridLayout(0, 1, 10, 10));
 		resultPanel.setLayout(new GridLayout(0, 1, 10, 10));
@@ -217,9 +224,9 @@ public class CommandPanel extends JPanel implements Observer {
 	 */
 	public void updateEnableButtons() {
 		for (MetaCommand key : commandButtons.keySet()) {
-			if(parent.getFilePanel().getSelectedFile() == null
-					|| (parent.getFilePanel().getSelectedFile().isDirectory() && !key.isApplyOnFolder())
-					|| (!parent.getFilePanel().getSelectedFile().isDirectory() && !key.isApplyOnFile())
+			if(parent.getResourcePanel().getSelectedFile() == null
+					|| (parent.getResourcePanel().getSelectedFile().isDirectory() && !key.isApplyOnFolder())
+					|| (!parent.getResourcePanel().getSelectedFile().isDirectory() && !key.isApplyOnFile())
 			) {
 				commandButtons.get(key).setEnabled(false);
 			}
@@ -236,7 +243,7 @@ public class CommandPanel extends JPanel implements Observer {
 	private void sendCommand(final MetaCommand commandName) {
 		final JLabel textToUpdate = commandResults.get(commandName);
 		try {
-			controller.addCommandToQueue(commandName, this.parent.getFilePanel().getSelectedFile().getPath(), new Observer() {
+			controller.addCommandToQueue(commandName, this.parent.getResourcePanel().getSelectedFile().getPath(), new Observer() {
 				@Override
 				public void update(Observable o, Object arg) {
 					if(o instanceof ICommand) {
