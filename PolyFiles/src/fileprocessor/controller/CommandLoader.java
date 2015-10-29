@@ -88,10 +88,13 @@ public class CommandLoader extends Thread {
 
 			/* For each .class load and add it to the commandList */
 			if (command.getName().endsWith(".class")) {
-				Class<? extends ICommand> commandClass = loadCommand(command);
-				MetaCommand mc = commandDataParser.generateMetacommand(command.getAbsolutePath().split(".class")[0] + ".xml");
-				commandList.put(mc, commandClass);
-				commandAPI.addCommandClass(mc, commandClass);
+				String xmlPath = command.getAbsolutePath().split(".class")[0] + ".xml";
+				if(new File(xmlPath).exists()){
+					Class<? extends ICommand> commandClass = loadCommand(command);
+					MetaCommand mc = commandDataParser.generateMetacommand(xmlPath);
+					commandList.put(mc, commandClass);
+					commandAPI.addCommandClass(mc, commandClass);
+				}
 			}
 		}
 	}
@@ -110,6 +113,20 @@ public class CommandLoader extends Thread {
 		return commandClass;
 	}
 
+	private void addCommand(File classCommand, File xmlCommand){
+		System.out.println("Add new Command to CommandAPI : " + classCommand.toString());
+		
+		try {
+			Class<? extends ICommand> commandClass = loadCommand(classCommand);
+			MetaCommand mc = commandDataParser.generateMetacommand(xmlCommand.getAbsolutePath());
+			
+			commandList.put(mc, commandClass);
+			commandAPI.addCommandClass(mc, commandClass);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * Plugin directory listener loop
 	 * Check if a file is added or removed from 
@@ -119,6 +136,8 @@ public class CommandLoader extends Thread {
 	 */
 	@Override
 	public synchronized void run() {
+		HashMap<String, File> xmlFileMapping = new HashMap<>();
+		HashMap<String, File> classFileMapping = new HashMap<>();
 		for (;;) {
 			WatchKey key = null;
 			// wait for key to be signaled
@@ -145,27 +164,46 @@ public class CommandLoader extends Thread {
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
 
-					if(!fileName.toString().endsWith(".class")) {
-						continue;
-					}
-					System.out.println("Add new Command to CommandAPI : " + fileName.toString());
-					
-					try {
-						Class<? extends ICommand> commandClass = loadCommand(fileName.toFile());
-						String metaCommandPath = commandDirectoryPath.toString() + "/" 
-								+ fileName.toString().split(".class")[0] + ".xml";
-						MetaCommand mc = commandDataParser.generateMetacommand(metaCommandPath);
+					if(fileName.toString().endsWith(".xml")){
+						final String commandName = fileName.toString().split(".xml")[0];
+						if(classFileMapping.containsKey(commandName)){
+							addCommand(classFileMapping.get(commandName), new File(commandDirectoryPath.toString() + "/" + fileName.toString()));
+							classFileMapping.remove(commandName);
+						}
+						else{
+							xmlFileMapping.put(commandName, new File(commandDirectoryPath.toString() + "/" + fileName.toString()));
+						}
 						
-						commandList.put(mc, commandClass);
-						commandAPI.addCommandClass(mc, commandClass);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}				
+					}
+					else if(fileName.toString().endsWith(".class")) {
+						final String commandName = fileName.toString().split(".class")[0];
+						if(xmlFileMapping.containsKey(commandName)){
+							addCommand(new File(commandDirectoryPath.toString() + "/" + fileName.toString()),xmlFileMapping.get(commandName));
+							xmlFileMapping.remove(commandName);
+						}
+						else{
+							classFileMapping.put(commandName, new File(commandDirectoryPath.toString() + "/" + fileName.toString()));
+						}						
+					}
+									
 					
 				} else if (kind == ENTRY_DELETE) {
 					WatchEvent<Path> ev = (WatchEvent<Path>) event;
 					Path fileName = ev.context();
 
+					if(fileName.toString().endsWith(".xml")){
+						final String commandName = fileName.toString().split(".xml")[0];
+						if(xmlFileMapping.containsKey(commandName)){
+							xmlFileMapping.remove(commandName);
+						}
+					}
+					else if(fileName.toString().endsWith(".class")) {
+						final String commandName = fileName.toString().split(".class")[0];
+						if(classFileMapping.containsKey(commandName)){
+							classFileMapping.remove(commandName);
+						}						
+					}
+					
 					if(!fileName.toString().endsWith(".class")) {
 						continue;
 					}

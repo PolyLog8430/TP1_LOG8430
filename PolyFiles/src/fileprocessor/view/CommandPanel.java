@@ -67,14 +67,14 @@ public class CommandPanel extends JPanel implements Observer {
 	private void createGUI() {
 		panel = new JPanel();
 
-		JButton clearBtn = new JButton("Réinitialiser");
+		JButton clearBtn = new JButton("Rï¿½initialiser");
 		clearBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				clearResults();
 			}
 		});
 
-		checkboxAutorun = new JCheckBox("Exécution automatique");
+		checkboxAutorun = new JCheckBox("Exï¿½cution automatique");
 		checkboxAutorun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendAllCommands();
@@ -172,10 +172,6 @@ public class CommandPanel extends JPanel implements Observer {
 			}
 		});
 		
-		if(checkboxAutorun.isSelected()) {
-			sendCommand(s);
-		}
-		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -227,6 +223,10 @@ public class CommandPanel extends JPanel implements Observer {
 				commandButtons.get(key).setEnabled(true);
 			}
 		}
+
+		if(checkboxAutorun.isSelected()) {
+			this.sendAllCommands();
+		}
 	}
 
 	/**
@@ -269,7 +269,7 @@ public class CommandPanel extends JPanel implements Observer {
 	/**
 	 * Loop on each command
 	 */
-	public void sendAllCommands() {
+	private void sendAllCommands() {
 		for(MetaCommand commandName : commandButtons.keySet()) {
 			if(commandButtons.get(commandName).isEnabled()) {
 				this.sendCommand(commandName);
@@ -277,13 +277,6 @@ public class CommandPanel extends JPanel implements Observer {
 		}
 	}
 
-	/**
-	 * @return boolean
-	 */
-	public boolean autorunIsChecked() {
-		return this.checkboxAutorun.isSelected();
-	}
-	
 	/**
 	 * Clear results in GUI
 	 */
