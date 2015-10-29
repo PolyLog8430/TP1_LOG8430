@@ -4,9 +4,10 @@ import fileprocessor.model.ICommand;
 import fileprocessor.model.MetaCommand;
 
 public class FolderNameCommand extends ICommand {
-
+	private static final MetaCommand meta = new MetaCommand("Nom du dossier",true,false);
+	
 	public static MetaCommand getCommandName() {
-		return new MetaCommand("Nom du dossier",true,false);
+		return meta;
 	}
 
 	@Override

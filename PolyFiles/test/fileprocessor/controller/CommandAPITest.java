@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import command.FileNameCommand;
 import fileprocessor.model.ICommand;
+import fileprocessor.model.MetaCommand;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +33,7 @@ public class CommandAPITest {
 	@Test
 	public void testAddClassCommand() throws Exception {
 		commandAPI.addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
-		//assertEquals(FileNameCommand.getCommandName(),commandAPI.getCommands().);
+		assertTrue(commandAPI.getCommands().contains(FileNameCommand.getCommandName()));
 	}
 
 	/**
@@ -43,19 +45,18 @@ public class CommandAPITest {
 	public void testRemoveClassCommand() throws Exception {
 		commandAPI.addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
 		commandAPI.removeCommandClass(FileNameCommand.getCommandName());
-		assertEquals(0,commandAPI.getCommands().size());
+		assertFalse(commandAPI.getCommands().contains(FileNameCommand.getCommandName()));
 	}
 
 
 	/**
-	 * Test remove a command class with random name
+	 * Test remove a command class with random MetaCommand
 	 * Excepted Exception
 	 * @throws Exception
 	 */
 	@Test(expected=Exception.class)
 	public void testRemoveClassCommandUnknonw() throws Exception {
-		commandAPI.addCommandClass(FileNameCommand.getCommandName(),FileNameCommand.class);
-		//commandAPI.removeCommandClass("toto");
+		commandAPI.removeCommandClass(new MetaCommand("toto", false, false));
 	}
 
 	/**
@@ -89,12 +90,12 @@ public class CommandAPITest {
 	public void testAddUnknownCommandToQueue() throws Exception {
 		CommandAPI commandAPI = new CommandAPI();
 
-		/*commandAPI.addCommandToQueue("", "", new Observer() {
+		commandAPI.addCommandToQueue(new MetaCommand("toto", false, false), "", new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
 				fail();
 			}
-		});*/
+		});
 	}
 
 }

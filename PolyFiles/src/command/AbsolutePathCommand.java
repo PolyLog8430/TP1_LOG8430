@@ -4,9 +4,10 @@ import fileprocessor.model.ICommand;
 import fileprocessor.model.MetaCommand;
 
 public class AbsolutePathCommand extends ICommand {
-
+	
+	private static final MetaCommand meta = new MetaCommand("Chemin absolu", true,true);
 	public static MetaCommand getCommandName() {
-		return new MetaCommand("Chemin absolu", true,true);
+		return meta;
 	}
 
 	@Override

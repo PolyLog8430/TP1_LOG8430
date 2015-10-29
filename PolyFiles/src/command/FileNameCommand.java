@@ -5,8 +5,9 @@ import fileprocessor.model.MetaCommand;
 
 public class FileNameCommand extends ICommand {
 
+	private static final MetaCommand meta = new MetaCommand("Nom du fichier", true, false);
     public static MetaCommand getCommandName() {
-        return new MetaCommand("Nom du fichier", true, false);
+        return meta;
     }
 
     @Override
